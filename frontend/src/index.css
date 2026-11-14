@@ -18,12 +18,12 @@ html {
 
 html.light {
   color-scheme: light;
-  --space-950: #ffffff;
-  --space-900: #f8fafc;
-  --space-850: #f1f5f9;
-  --space-800: #e2e8f0;
-  --space-700: #cbd5e1;
-  --space-border: #cbd5e1;
+  --space-950: #f4f7fb;
+  --space-900: #eaf0f7;
+  --space-850: #e1e9f2;
+  --space-800: #d4e0ec;
+  --space-700: #94a3b8;
+  --space-border: #d0dbe7;
 }
 
 body {
@@ -55,8 +55,8 @@ body {
 
 /* Glassmorphism Card Styles (Default Dark Mode) */
 .astro-card {
-  background: rgba(12, 21, 46, 0.7);
-  backdrop-filter: blur(12px);
+  background: rgba(12, 21, 46, 0.75);
+  backdrop-filter: blur(14px);
   border: 1px solid rgba(31, 51, 102, 0.7);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -72,31 +72,32 @@ body {
 
 /* ==========================================================================
    LIGHT MODE CONTRAST & ACCESSIBILITY SYSTEM
-   Ensures WCAG AAA readability on white/light backgrounds while keeping 
-   neon sci-fi aesthetics in dark mode.
+   Ensures WCAG AAA readability on soft celestial surfaces while preserving 
+   scientific elegance and subtle astronomical accents.
    ========================================================================== */
 
 html.light body {
-  background-color: #f8fafc;
+  background-color: #f4f7fb;
   background-image: 
-    radial-gradient(at 10% 10%, rgba(2, 132, 199, 0.06) 0px, transparent 50%),
-    radial-gradient(at 90% 90%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
-    radial-gradient(at 50% 50%, rgba(241, 245, 249, 0.95) 0px, transparent 100%);
+    radial-gradient(at 12% 15%, rgba(2, 132, 199, 0.07) 0px, transparent 55%),
+    radial-gradient(at 88% 20%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 70%, rgba(56, 189, 248, 0.06) 0px, transparent 60%),
+    radial-gradient(at 82% 85%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
   color: #0f172a;
 }
 
-/* 1. Neutral Text Contrast */
+/* 1. Neutral Text Contrast Hierarchy */
 html.light .text-white {
-  color: #0f172a !important;
+  color: #091124 !important; /* Deep authoritative celestial navy */
 }
 html.light .text-slate-100 {
-  color: #0f172a !important;
+  color: #091124 !important;
 }
 html.light .text-slate-200 {
-  color: #1e293b !important;
+  color: #1a2538 !important;
 }
 html.light .text-slate-300 {
-  color: #334155 !important;
+  color: #2b3952 !important;
 }
 html.light .text-slate-400 {
   color: #475569 !important;
@@ -149,55 +150,67 @@ html.light .text-rose-500 {
   font-weight: 600;
 }
 
-/* 3. Cards, Modals & Surfaces in Light Mode */
+/* 3. Cards, Modals & Surfaces in Light Mode (Soft Off-White & Pale Blue Frosted Glass) */
 html.light .astro-card {
-  background: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid #cbd5e1 !important;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
 }
 
 html.light .astro-card-hover:hover {
-  border-color: #0284c7 !important;
-  box-shadow: 0 10px 25px -3px rgba(2, 132, 199, 0.15) !important;
+  border-color: rgba(2, 132, 199, 0.55) !important;
+  box-shadow: 0 12px 28px -4px rgba(2, 132, 199, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04) !important;
+  transform: translateY(-2px);
 }
 
 html.light .bg-space-950 {
-  background-color: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
+  background-color: rgba(244, 247, 251, 0.95) !important;
+  border-color: rgba(208, 219, 231, 0.85) !important;
 }
 
 html.light .bg-space-900 {
-  background-color: #f8fafc !important;
-  border-color: #cbd5e1 !important;
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(208, 219, 231, 0.85) !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
 }
 
 html.light .bg-space-850,
 html.light .bg-space-850\/60,
 html.light .bg-space-850\/80 {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
 }
 
 html.light .bg-space-800 {
-  background-color: #e2e8f0 !important;
-  border-color: #cbd5e1 !important;
+  background-color: #e5edf5 !important;
+  border-color: #d0dbe7 !important;
 }
 
 html.light .border-space-border,
 html.light .border-space-border\/40,
 html.light .border-space-border\/60,
 html.light .border-space-border\/80 {
-  border-color: #cbd5e1 !important;
+  border-color: #d0dbe7 !important;
 }
 
 /* 4. Form Controls (Input, Select, Textarea) in Light Mode */
 html.light input,
 html.light select,
 html.light textarea {
-  background-color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.96) !important;
   color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+  border: 1px solid #d0dbe7 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  border-color: #0284c7 !important;
+  outline: 2px solid rgba(2, 132, 199, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 html.light input::placeholder {
   color: #64748b !important;
@@ -248,13 +261,13 @@ html.light .bg-rose-500\/20 {
 
 /* 6. Navigation Bar & Sticky Headers in Light Mode */
 html.light header {
-  background-color: rgba(255, 255, 255, 0.94) !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+  background-color: rgba(244, 247, 251, 0.92) !important;
+  border-color: #d0dbe7 !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05) !important;
 }
 
 html.light header a {
-  color: #334155 !important;
+  color: #2b3952 !important;
 }
 html.light header a:hover {
   color: #0284c7 !important;
@@ -265,13 +278,31 @@ html.light header a.active {
   color: #0369a1 !important;
 }
 
-/* 7. Action Buttons in Light Mode */
+/* 7. Action Buttons & Controls in Light Mode */
 html.light button.bg-space-850 {
-  background-color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: #d0dbe7 !important;
+  color: #2b3952 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
 }
 html.light button.bg-space-850:hover {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
+  background-color: #edf3fa !important;
+  color: #091124 !important;
+  border-color: #0284c7 !important;
+}
+
+/* 8. Table & Data Grid Elevation in Light Mode */
+html.light thead,
+html.light th {
+  background-color: #edf2f8 !important;
+  color: #1a2538 !important;
+  border-color: #d0dbe7 !important;
+}
+
+html.light tr {
+  border-color: #e5edf5 !important;
+}
+
+html.light tr:hover {
+  background-color: rgba(2, 132, 199, 0.04) !important;
 }
