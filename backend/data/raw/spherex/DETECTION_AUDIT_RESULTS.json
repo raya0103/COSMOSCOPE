@@ -1,0 +1,362 @@
+[
+  {
+    "target": "R Draconis",
+    "obs_id": "2025W17_4B_0021_1",
+    "detector": 3,
+    "band": "SPHEREx-D3",
+    "px": 14.08,
+    "py": 14.36,
+    "peak_flux": 4678.12,
+    "bg_median": 46.2776,
+    "bg_std": 42.0195,
+    "snr": 110.23,
+    "centroid_px": [
+      15.11,
+      12.95
+    ],
+    "astrometric_offset_arcsec": 10.56,
+    "status": "DETECTED"
+  },
+  {
+    "target": "R Draconis",
+    "obs_id": "2025W17_4B_0021_1",
+    "detector": 6,
+    "band": "SPHEREx-D6",
+    "px": 13.72,
+    "py": 14.32,
+    "peak_flux": 6463.97,
+    "bg_median": 40.3824,
+    "bg_std": 53.6602,
+    "snr": 119.71,
+    "centroid_px": [
+      13.73,
+      14.54
+    ],
+    "astrometric_offset_arcsec": 1.37,
+    "status": "DETECTED"
+  },
+  {
+    "target": "R Draconis",
+    "obs_id": "2025W17_4B_0145_1",
+    "detector": 3,
+    "band": "SPHEREx-D3",
+    "px": 13.87,
+    "py": 14.47,
+    "peak_flux": 3316.58,
+    "bg_median": 28.4938,
+    "bg_std": 10.4278,
+    "snr": 315.32,
+    "centroid_px": [
+      14.03,
+      14.5
+    ],
+    "astrometric_offset_arcsec": 1.01,
+    "status": "DETECTED"
+  },
+  {
+    "target": "R Draconis",
+    "obs_id": "2025W17_4B_0145_1",
+    "detector": 6,
+    "band": "SPHEREx-D6",
+    "px": 13.71,
+    "py": 13.93,
+    "peak_flux": 7019.5,
+    "bg_median": 18.4987,
+    "bg_std": 18.2898,
+    "snr": 382.78,
+    "centroid_px": [
+      13.62,
+      14.43
+    ],
+    "astrometric_offset_arcsec": 3.07,
+    "status": "DETECTED"
+  },
+  {
+    "target": "Barnard's Star",
+    "obs_id": "2025W33_2C_0321_1",
+    "detector": 3,
+    "band": "SPHEREx-D3",
+    "px": 13.69,
+    "py": 14.16,
+    "peak_flux": 0.91,
+    "bg_median": 0.1664,
+    "bg_std": 0.1248,
+    "snr": 5.99,
+    "centroid_px": [
+      11.68,
+      14.14
+    ],
+    "astrometric_offset_arcsec": 12.37,
+    "status": "DETECTED"
+  },
+  {
+    "target": "Barnard's Star",
+    "obs_id": "2025W33_2C_0321_1",
+    "detector": 6,
+    "band": "SPHEREx-D6",
+    "px": 14.27,
+    "py": 14.25,
+    "peak_flux": 0.59,
+    "bg_median": 0.4536,
+    "bg_std": 2.3184,
+    "snr": 0.06,
+    "centroid_px": [
+      13.91,
+      14.29
+    ],
+    "astrometric_offset_arcsec": 2.21,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "Barnard's Star",
+    "obs_id": "2025W33_2C_0386_3",
+    "detector": 3,
+    "band": "SPHEREx-D3",
+    "px": 13.85,
+    "py": 14.18,
+    "peak_flux": 0.5,
+    "bg_median": 0.2642,
+    "bg_std": 0.5394,
+    "snr": 0.43,
+    "centroid_px": [
+      12.3,
+      13.64
+    ],
+    "astrometric_offset_arcsec": 10.26,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "Barnard's Star",
+    "obs_id": "2025W34_1B_0164_1",
+    "detector": 6,
+    "band": "SPHEREx-D6",
+    "px": 14.36,
+    "py": 13.92,
+    "peak_flux": 0.39,
+    "bg_median": 0.2995,
+    "bg_std": 0.067,
+    "snr": 1.28,
+    "centroid_px": [
+      14.44,
+      13.65
+    ],
+    "astrometric_offset_arcsec": 1.7,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "WISE 0855-0714",
+    "obs_id": "2025W19_1B_0116_1",
+    "detector": 3,
+    "band": "SPHEREx-D3",
+    "px": 14.23,
+    "py": 13.74,
+    "peak_flux": 0.41,
+    "bg_median": 0.1504,
+    "bg_std": 0.3823,
+    "snr": 0.67,
+    "centroid_px": [
+      14.52,
+      12.5
+    ],
+    "astrometric_offset_arcsec": 7.74,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "WISE 0855-0714",
+    "obs_id": "2025W19_1B_0116_1",
+    "detector": 6,
+    "band": "SPHEREx-D6",
+    "px": 13.64,
+    "py": 14.25,
+    "peak_flux": 1.03,
+    "bg_median": 0.7827,
+    "bg_std": 0.7557,
+    "snr": 0.33,
+    "centroid_px": [
+      13.73,
+      14.11
+    ],
+    "astrometric_offset_arcsec": 0.99,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "WISE 0855-0714",
+    "obs_id": "2025W19_1B_0181_1",
+    "detector": 2,
+    "band": "SPHEREx-D2",
+    "px": 14.28,
+    "py": 13.97,
+    "peak_flux": 0.35,
+    "bg_median": 0.2539,
+    "bg_std": 0.8936,
+    "snr": 0.11,
+    "centroid_px": [
+      14.43,
+      12.77
+    ],
+    "astrometric_offset_arcsec": 7.44,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "WISE 0855-0714",
+    "obs_id": "2025W19_1B_0181_1",
+    "detector": 5,
+    "band": "SPHEREx-D5",
+    "px": 13.79,
+    "py": 13.86,
+    "peak_flux": 21.78,
+    "bg_median": 0.3549,
+    "bg_std": 0.1399,
+    "snr": 153.12,
+    "centroid_px": [
+      14.96,
+      14.98
+    ],
+    "astrometric_offset_arcsec": 9.88,
+    "status": "DETECTED"
+  },
+  {
+    "target": "RW Aurigae",
+    "obs_id": "2025W36_1A_0095_1",
+    "detector": 1,
+    "band": "SPHEREx-D1",
+    "px": 14.31,
+    "py": 13.61,
+    "peak_flux": 49.63,
+    "bg_median": 1.2282,
+    "bg_std": 0.3131,
+    "snr": 154.61,
+    "centroid_px": [
+      14.4,
+      13.47
+    ],
+    "astrometric_offset_arcsec": 1.04,
+    "status": "DETECTED"
+  },
+  {
+    "target": "RW Aurigae",
+    "obs_id": "2025W36_1A_0095_1",
+    "detector": 4,
+    "band": "SPHEREx-D4",
+    "px": 13.54,
+    "py": 14.37,
+    "peak_flux": 428.23,
+    "bg_median": 0.4837,
+    "bg_std": 0.2318,
+    "snr": 1845.08,
+    "centroid_px": [
+      13.44,
+      14.32
+    ],
+    "astrometric_offset_arcsec": 0.68,
+    "status": "DETECTED"
+  },
+  {
+    "target": "RW Aurigae",
+    "obs_id": "2025W36_1A_0233_2",
+    "detector": 4,
+    "band": "SPHEREx-D4",
+    "px": 13.92,
+    "py": 14.12,
+    "peak_flux": 387.18,
+    "bg_median": 0.3908,
+    "bg_std": 0.1464,
+    "snr": 2641.55,
+    "centroid_px": [
+      13.97,
+      14.02
+    ],
+    "astrometric_offset_arcsec": 0.71,
+    "status": "DETECTED"
+  },
+  {
+    "target": "RW Aurigae",
+    "obs_id": "2025W36_1A_0446_1",
+    "detector": 1,
+    "band": "SPHEREx-D1",
+    "px": 13.79,
+    "py": 13.56,
+    "peak_flux": 48.19,
+    "bg_median": 0.4387,
+    "bg_std": 0.2489,
+    "snr": 191.83,
+    "centroid_px": [
+      13.91,
+      13.42
+    ],
+    "astrometric_offset_arcsec": 1.19,
+    "status": "DETECTED"
+  },
+  {
+    "target": "Epsilon Indi B",
+    "obs_id": "2025W17_4B_0017_1",
+    "detector": 2,
+    "band": "SPHEREx-D2",
+    "px": 14.33,
+    "py": 13.56,
+    "peak_flux": 0.44,
+    "bg_median": 0.3699,
+    "bg_std": 0.0598,
+    "snr": 1.21,
+    "centroid_px": [
+      15.8,
+      13.77
+    ],
+    "astrometric_offset_arcsec": 9.04,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "Epsilon Indi B",
+    "obs_id": "2025W17_4B_0017_1",
+    "detector": 5,
+    "band": "SPHEREx-D5",
+    "px": 13.91,
+    "py": 14.03,
+    "peak_flux": 0.35,
+    "bg_median": 0.2993,
+    "bg_std": 0.0406,
+    "snr": 1.18,
+    "centroid_px": [
+      14.16,
+      14.15
+    ],
+    "astrometric_offset_arcsec": 1.72,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "Epsilon Indi B",
+    "obs_id": "2025W17_4B_0077_3",
+    "detector": 4,
+    "band": "SPHEREx-D4",
+    "px": 14.09,
+    "py": 14.45,
+    "peak_flux": 0.21,
+    "bg_median": 0.1823,
+    "bg_std": 0.029,
+    "snr": 0.82,
+    "centroid_px": [
+      14.85,
+      15.18
+    ],
+    "astrometric_offset_arcsec": 6.43,
+    "status": "WEAK/FAINT"
+  },
+  {
+    "target": "Epsilon Indi B",
+    "obs_id": "2025W17_4B_0202_1",
+    "detector": 5,
+    "band": "SPHEREx-D5",
+    "px": 13.65,
+    "py": 14.49,
+    "peak_flux": 0.41,
+    "bg_median": 0.3288,
+    "bg_std": 0.063,
+    "snr": 1.26,
+    "centroid_px": [
+      14.05,
+      14.88
+    ],
+    "astrometric_offset_arcsec": 3.42,
+    "status": "WEAK/FAINT"
+  }
+]

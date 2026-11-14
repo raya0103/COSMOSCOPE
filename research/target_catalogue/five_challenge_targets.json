@@ -1,0 +1,77 @@
+{
+  "catalog_name": "NASA Space Apps 2026 SPHEREx Challenge Targets",
+  "generated_at": "2026-11-11T15:40:00Z",
+  "archive_source": "NASA/IPAC Infrared Science Archive (IRSA)",
+  "targets": [
+    {
+      "id": "barnards_star",
+      "designation": "Barnard's Star (GJ 699)",
+      "spectral_type": "M4.0V",
+      "ra_deg": 269.45208,
+      "dec_deg": 4.69333,
+      "ra_sexagesimal": "17h 57m 48.50s",
+      "dec_sexagesimal": "+04d 41m 36.0s",
+      "distance_pc": 1.83,
+      "proper_motion_mas_yr": 10393.3,
+      "gaia_source_id": "4472832130942575872",
+      "spherex_observations_count": 364,
+      "scientific_focus": "High Proper Motion & Astrometric Baseline"
+    },
+    {
+      "id": "epsilon_indi_b",
+      "designation": "Epsilon Indi B (eps Ind B)",
+      "spectral_type": "T1 + T6 Binary Brown Dwarf",
+      "ra_deg": 331.04375,
+      "dec_deg": -56.78278,
+      "ra_sexagesimal": "22h 04m 10.50s",
+      "dec_sexagesimal": "-56d 46m 58.0s",
+      "distance_pc": 3.64,
+      "proper_motion_mas_yr": 4705.0,
+      "gaia_source_id": "6412574184396486016",
+      "spherex_observations_count": 449,
+      "scientific_focus": "Substellar Near-Infrared Spectrophotometry"
+    },
+    {
+      "id": "wise_0855",
+      "designation": "WISE J085510.83-071442.5",
+      "spectral_type": "Y4 Brown Dwarf",
+      "ra_deg": 133.79513,
+      "dec_deg": -7.24515,
+      "ra_sexagesimal": "08h 55m 10.83s",
+      "dec_sexagesimal": "-07d 14m 42.5s",
+      "distance_pc": 2.23,
+      "proper_motion_mas_yr": 8140.0,
+      "gaia_source_id": null,
+      "spherex_observations_count": 256,
+      "scientific_focus": "Sub-Zero Temperature & Atmospheric Water Ice Clouds"
+    },
+    {
+      "id": "rw_aurigae",
+      "designation": "RW Aurigae (RW Aur)",
+      "spectral_type": "K3:e + K0:e T Tauri Variable",
+      "ra_deg": 76.95642,
+      "dec_deg": 30.40142,
+      "ra_sexagesimal": "05h 07m 49.54s",
+      "dec_sexagesimal": "+30d 24m 05.1s",
+      "distance_pc": 163.0,
+      "proper_motion_mas_yr": 18.5,
+      "gaia_source_id": "164223211516091008",
+      "spherex_observations_count": 333,
+      "scientific_focus": "Eruptive Circumstellar Disk Variability & Obscuration"
+    },
+    {
+      "id": "r_draconis",
+      "designation": "R Draconis (R Dra)",
+      "spectral_type": "M3e-M9e Mira Variable",
+      "ra_deg": 248.16750,
+      "dec_deg": 66.75500,
+      "ra_sexagesimal": "16h 32m 40.20s",
+      "dec_sexagesimal": "+66d 45m 18.0s",
+      "distance_pc": 680.0,
+      "proper_motion_mas_yr": 12.0,
+      "gaia_source_id": "1634575971578149888",
+      "spherex_observations_count": 2483,
+      "scientific_focus": "Long-Period Mira Pulsations (~245 days) in CVZ"
+    }
+  ]
+}

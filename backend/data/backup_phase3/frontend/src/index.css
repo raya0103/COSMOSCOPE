@@ -1,0 +1,273 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --space-950: #030712;
+  --space-900: #070D1E;
+  --space-850: #0C152E;
+  --space-800: #111E3F;
+  --space-700: #1A2E5E;
+  --space-border: #1F3366;
+}
+
+html.light {
+  color-scheme: light;
+  --space-950: #ffffff;
+  --space-900: #f8fafc;
+  --space-850: #f1f5f9;
+  --space-800: #e2e8f0;
+  --space-700: #cbd5e1;
+  --space-border: #cbd5e1;
+}
+
+body {
+  margin: 0;
+  background-color: var(--space-950);
+  background-image: 
+    radial-gradient(at 10% 10%, rgba(0, 240, 255, 0.05) 0px, transparent 50%),
+    radial-gradient(at 90% 90%, rgba(157, 78, 221, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(10, 17, 40, 0.6) 0px, transparent 100%);
+  background-attachment: fixed;
+  transition: background-color 0.3s ease;
+}
+
+/* Custom Astronomical Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--space-900);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--space-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00F0FF;
+}
+
+/* Glassmorphism Card Styles (Default Dark Mode) */
+.astro-card {
+  background: rgba(12, 21, 46, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(31, 51, 102, 0.7);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.astro-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.astro-card-hover:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 8px 30px rgba(0, 240, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   LIGHT MODE CONTRAST & ACCESSIBILITY SYSTEM
+   Ensures WCAG AAA readability on white/light backgrounds while keeping 
+   neon sci-fi aesthetics in dark mode.
+   ========================================================================== */
+
+html.light body {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 10% 10%, rgba(2, 132, 199, 0.06) 0px, transparent 50%),
+    radial-gradient(at 90% 90%, rgba(124, 58, 237, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(241, 245, 249, 0.95) 0px, transparent 100%);
+  color: #0f172a;
+}
+
+/* 1. Neutral Text Contrast */
+html.light .text-white {
+  color: #0f172a !important;
+}
+html.light .text-slate-100 {
+  color: #0f172a !important;
+}
+html.light .text-slate-200 {
+  color: #1e293b !important;
+}
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+html.light .text-slate-400 {
+  color: #475569 !important;
+}
+html.light .text-slate-500 {
+  color: #64748b !important;
+}
+
+/* 2. High-Contrast Readable Colored Accents for Light Mode */
+html.light .text-cyan-200,
+html.light .text-cyan-300,
+html.light .text-cyan-400,
+html.light .text-cyan-500 {
+  color: #0369a1 !important; /* Deep cerulean / oceanic sky blue */
+  font-weight: 600;
+}
+
+html.light .text-sky-300,
+html.light .text-sky-400,
+html.light .text-sky-500 {
+  color: #0284c7 !important;
+  font-weight: 600;
+}
+
+html.light .text-violet-300,
+html.light .text-violet-400,
+html.light .text-violet-500 {
+  color: #6d28d9 !important; /* Deep royal violet */
+  font-weight: 600;
+}
+
+html.light .text-emerald-300,
+html.light .text-emerald-400,
+html.light .text-emerald-500 {
+  color: #047857 !important; /* Deep forest emerald */
+  font-weight: 600;
+}
+
+html.light .text-amber-300,
+html.light .text-amber-400,
+html.light .text-amber-500 {
+  color: #b45309 !important; /* Deep bronze amber */
+  font-weight: 600;
+}
+
+html.light .text-rose-300,
+html.light .text-rose-400,
+html.light .text-rose-500 {
+  color: #be123c !important; /* Deep ruby rose */
+  font-weight: 600;
+}
+
+/* 3. Cards, Modals & Surfaces in Light Mode */
+html.light .astro-card {
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .astro-card-hover:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 10px 25px -3px rgba(2, 132, 199, 0.15) !important;
+}
+
+html.light .bg-space-950 {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light .bg-space-900 {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light .bg-space-850,
+html.light .bg-space-850\/60,
+html.light .bg-space-850\/80 {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html.light .bg-space-800 {
+  background-color: #e2e8f0 !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light .border-space-border,
+html.light .border-space-border\/40,
+html.light .border-space-border\/60,
+html.light .border-space-border\/80 {
+  border-color: #cbd5e1 !important;
+}
+
+/* 4. Form Controls (Input, Select, Textarea) in Light Mode */
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+html.light input::placeholder {
+  color: #64748b !important;
+}
+
+/* 5. Badges, Tags & Pill Overrides in Light Mode */
+html.light .bg-cyan-500\/10,
+html.light .bg-cyan-500\/15,
+html.light .bg-cyan-500\/20 {
+  background-color: #e0f2fe !important;
+  border-color: #7dd3fc !important;
+  color: #0369a1 !important;
+}
+
+html.light .bg-violet-500\/10,
+html.light .bg-violet-500\/15,
+html.light .bg-violet-500\/20,
+html.light .bg-violet-600\/30 {
+  background-color: #f3e8ff !important;
+  border-color: #d8b4fe !important;
+  color: #6d28d9 !important;
+}
+
+html.light .bg-emerald-500\/10,
+html.light .bg-emerald-500\/15,
+html.light .bg-emerald-500\/20,
+html.light .bg-emerald-600\/30 {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #047857 !important;
+}
+
+html.light .bg-amber-500\/10,
+html.light .bg-amber-500\/15,
+html.light .bg-amber-500\/20 {
+  background-color: #fef3c7 !important;
+  border-color: #fde68a !important;
+  color: #b45309 !important;
+}
+
+html.light .bg-rose-500\/10,
+html.light .bg-rose-500\/15,
+html.light .bg-rose-500\/20 {
+  background-color: #ffe4e6 !important;
+  border-color: #fecdd3 !important;
+  color: #be123c !important;
+}
+
+/* 6. Navigation Bar & Sticky Headers in Light Mode */
+html.light header {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.light header a {
+  color: #334155 !important;
+}
+html.light header a:hover {
+  color: #0284c7 !important;
+}
+html.light header a.active {
+  background-color: #e0f2fe !important;
+  border-color: #7dd3fc !important;
+  color: #0369a1 !important;
+}
+
+/* 7. Action Buttons in Light Mode */
+html.light button.bg-space-850 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+html.light button.bg-space-850:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}

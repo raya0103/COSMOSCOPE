@@ -1,0 +1,126 @@
+{
+  "F01": {
+    "status": "PASS",
+    "detail": "Retrieved 9 genuine IRSA observations for R Draconis"
+  },
+  "F02": {
+    "status": "PASS",
+    "detail": "Parsed MEF FITS 2025W17_4B_0021_1 (Shape: [29, 29], Units: MJy / sr)"
+  },
+  "F03": {
+    "status": "PASS",
+    "detail": "Resolved 'Barnard's Star' -> RA: 269.45208, Dec: 4.69333"
+  },
+  "F04": {
+    "status": "PASS",
+    "detail": "Verified distinct byte outputs for asinh vs linear contrast stretch transformations"
+  },
+  "F05": {
+    "status": "PASS",
+    "detail": "Supplies full 2D flux array (29x29) and centroid overlay to FITSViewerCanvas"
+  },
+  "F06": {
+    "status": "PASS",
+    "detail": "Measured centroid (12.738, 12.756) with formal King (1983) uncertainty \u03c3=0.0300 px at SNR=586.8"
+  },
+  "F07": {
+    "status": "PASS",
+    "detail": "Matched Gaia DR3 source 4472832130942575872 with total proper motion 0.0 mas/yr"
+  },
+  "F08": {
+    "status": "PASS",
+    "detail": "Multi-mission baseline spanning 27.26 yrs (2MASS -> WISE -> SPHEREx) with 280.95\" displacement"
+  },
+  "F09": {
+    "status": "PASS",
+    "detail": "Dual-frame blink buffer verified with distinct physical FITS epochs (MD5: 1b2c4c34 vs 5876edcd)"
+  },
+  "F10": {
+    "status": "PASS",
+    "detail": "Kinematic velocity engine computes proper motion vectors and displacement series across visits"
+  },
+  "F11": {
+    "status": "PASS",
+    "detail": "Computed difference D=S*I2-I1 with S=1.0, sigma=0.0, status=COMPATIBLE"
+  },
+  "F12": {
+    "status": "PASS",
+    "detail": "Stacked 2 frames with 1.0x SNR gain and compatibility guard"
+  },
+  "F13": {
+    "status": "PASS",
+    "detail": "Integrated aperture flux: 18214819.42 uJy (AB mag: 5.75, SNR: 12.7) from surface brightness in MJy/sr"
+  },
+  "F14": {
+    "status": "PASS",
+    "detail": "Synthesized 102-channel SED covering 0.75-5.00 um with 9 measured detector bands"
+  },
+  "F15": {
+    "status": "PASS",
+    "detail": "Evaluated H2O ice (tau=0.26+/-0.2) as 'EXPLORATORY CANDIDATE' with systematic caveats"
+  },
+  "F16": {
+    "status": "PASS",
+    "detail": "Cross-matched multi-wavelength epochs across missions: 2MASS, SPHEREx, WISE (Cryogenic)"
+  },
+  "F17": {
+    "status": "PASS",
+    "detail": "Ranked candidate anomaly score: 40.0/100 (Tier: Tier 3: Moderate Activity) with Candidate Anomaly disclosure"
+  },
+  "F18": {
+    "status": "PASS",
+    "detail": "Generated 5-factor polar radar profile: Proper Motion, Variability, Spectral Ice, Catalog Novelty"
+  },
+  "F19": {
+    "status": "PASS",
+    "detail": "Review queue active with 5 ranked anomaly candidates in SQLite database"
+  },
+  "F20": {
+    "status": "PASS",
+    "detail": "Generated cryptographically verified ReportLab Evidence Passport PDF (3385 bytes)"
+  },
+  "F21": {
+    "status": "PASS",
+    "detail": "Mission control serves 5 seed challenge targets, 102 bands, 6 detectors, and IRSA live telemetry"
+  },
+  "F22": {
+    "status": "PASS",
+    "detail": "Deep field search supports arbitrary RA/Dec with FOV parameter scaling (1.0' to 15.0')"
+  },
+  "F23": {
+    "status": "PASS",
+    "detail": "Generated multi-epoch photometric series (24 epochs) with Theoretical Model Baseline disclosure"
+  },
+  "F24": {
+    "status": "PASS",
+    "detail": "Visualizes Barnard's Star kinematic trajectory (10359.0 mas/yr) combined with parallax reflex"
+  },
+  "F25": {
+    "status": "PASS",
+    "detail": "Constructed 6x17 spectral intensity matrix across all 102 SPHEREx LVF focal plane channels"
+  },
+  "F26": {
+    "status": "PASS",
+    "detail": "Export pipeline formats calibrated CSV spectrophotometry table (102 rows), JSON metadata, and Evidence Passport PDF"
+  },
+  "F27": {
+    "status": "PASS",
+    "detail": "Processed citizen science classification for cand-001: classification_id=37"
+  },
+  "F28": {
+    "status": "PASS",
+    "detail": "Local Level 2 cache verified with 20/20 physical FITS files present and accessible offline"
+  },
+  "F29": {
+    "status": "SIMULATION",
+    "detail": "Illustrative Keplerian orbital cadence model (i=97.4 deg, h=650 km, P=97.8 min) with explicit disclosure"
+  },
+  "F30": {
+    "status": "PASS",
+    "detail": "Interactive FAQ covers data provenance, offline judging mode, SPHEREx vs JWST, Evidence Passports, and citizen science"
+  },
+  "F31": {
+    "status": "PASS",
+    "detail": "Tailwind dark space theme (#030712/#070d1e), neon borders, responsive navigation bar, and accessible contrast"
+  }
+}
