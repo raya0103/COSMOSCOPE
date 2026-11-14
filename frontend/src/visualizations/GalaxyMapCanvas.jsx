@@ -12,13 +12,12 @@ import {
 import GalaxyOverviewCanvas from './GalaxyOverviewCanvas';
 import RealSkySurveyViewer from './RealSkySurveyViewer';
 
-const CHALLENGE_TARGETS = [
-  { id: "barnards-star", name: "Barnard's Star", ra: 269.45208, dec: 4.69333, color: "#00F0FF", type: "High Proper Motion M-Dwarf", constell: "Ophiuchus", badge: "10.4″/yr Motion" },
-  { id: "wise-0855", name: "WISE 0855", ra: 133.79513, dec: -7.24515, color: "#38BDF8", type: "Coldest Brown Dwarf (Water Ice)", constell: "Hydra", badge: "Water Ice" },
-  { id: "epsilon-indi-b", name: "Epsilon Indi B", ra: 331.04375, dec: -56.78278, color: "#A855F7", type: "Substellar Binary Brown Dwarf", constell: "Indus", badge: "Brown Dwarf" },
-  { id: "rw-aurigae", name: "RW Aurigae", ra: 76.95642, dec: 30.40142, color: "#F59E0B", type: "Eruptive T Tauri Variable", constell: "Auriga", badge: "Variable YSO" },
-  { id: "r-draconis", name: "R Draconis", ra: 248.16750, dec: 66.75500, color: "#EC4899", type: "Mira Pulsating Giant Variable", constell: "Draco", badge: "Mira Giant" },
-];
+import { 
+  CELESTIAL_CATALOG, 
+  CHALLENGE_TARGETS, 
+  CELESTIAL_CATEGORIES, 
+  getTargetsByCategory 
+} from '../data/celestialCatalog';
 
 const SURVEY_OPTIONS = [
   { id: 'P/DSS2/color', name: 'DSS2 Optical', desc: '0.4 – 0.9 µm (POSS-II/AAO Color)', wave: 'Optical' },
@@ -55,6 +54,7 @@ export default function GalaxyMapCanvas({
 }) {
   // Mode selection: 'overview' (Animated Galaxy) vs 'survey' (Real HiPS Sky Survey)
   const [activeMode, setActiveMode] = useState('overview');
+  const [catalogCategory, setCatalogCategory] = useState('challenge');
 
   // Shared View settings across both modes
   const [currentSurvey, setCurrentSurvey] = useState('P/DSS2/color');
@@ -222,13 +222,25 @@ export default function GalaxyMapCanvas({
           />
         )}
 
-        {/* 5 NASA Challenge Target Quick Jump Pills (Floating above bottom) */}
+        {/* Quick Jump Target Pills with Category Filter (Floating above bottom) */}
         <div className="absolute bottom-2.5 left-3 right-3 flex items-center gap-1.5 overflow-x-auto no-scrollbar z-20 pointer-events-auto">
-          <span className="text-[10px] font-semibold text-slate-300 bg-space-950/95 px-2 py-1 rounded-lg border border-space-border flex items-center gap-1 whitespace-nowrap backdrop-blur-md shadow-md">
+          <div className="flex items-center gap-1 bg-space-950/95 px-2 py-1 rounded-lg border border-space-border backdrop-blur-md shadow-md shrink-0">
             <Target className="w-3 h-3 text-cyan-400" />
-            <span>5 Targets:</span>
-          </span>
-          {CHALLENGE_TARGETS.map(t => {
+            <select
+              value={catalogCategory}
+              onChange={(e) => setCatalogCategory(e.target.value)}
+              className="bg-transparent text-[10px] font-semibold text-slate-200 focus:outline-none cursor-pointer"
+            >
+              <option value="challenge" className="bg-space-950 text-slate-200">Challenge (5)</option>
+              <option value="all" className="bg-space-950 text-slate-200">All Objects (20)</option>
+              <option value="stars" className="bg-space-950 text-slate-200">Stars (3)</option>
+              <option value="brown_dwarfs" className="bg-space-950 text-slate-200">Brown Dwarfs (4)</option>
+              <option value="ysos" className="bg-space-950 text-slate-200">YSOs (4)</option>
+              <option value="variables" className="bg-space-950 text-slate-200">Variables (4)</option>
+              <option value="nebulae_extragalactic" className="bg-space-950 text-slate-200">Nebulae (3)</option>
+            </select>
+          </div>
+          {getTargetsByCategory(catalogCategory).map(t => {
             const isSel = Math.abs(t.ra - selectedRa) < 0.1 && Math.abs(t.dec - selectedDec) < 0.1;
             return (
               <button
@@ -237,14 +249,17 @@ export default function GalaxyMapCanvas({
                   e.stopPropagation();
                   if (onSelectTarget) onSelectTarget(t.ra, t.dec, t.name);
                 }}
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-mono whitespace-nowrap transition-all border backdrop-blur-md shadow-md ${
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-mono whitespace-nowrap transition-all border backdrop-blur-md shadow-md flex items-center gap-1 ${
                   isSel
                     ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400 font-bold shadow-[0_0_12px_rgba(0,240,255,0.3)]'
                     : 'bg-space-950/90 text-slate-300 border-space-border hover:bg-space-850 hover:text-white hover:border-cyan-500/40'
                 }`}
               >
+                {t.isChallengeTarget && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 inline-block" title="NASA Challenge Target" />
+                )}
                 <span>{t.name}</span>
-                <span className="text-[9px] text-slate-400 ml-1 opacity-75">({t.badge})</span>
+                <span className="text-[9px] text-slate-400 opacity-75">({t.badge})</span>
               </button>
             );
           })}

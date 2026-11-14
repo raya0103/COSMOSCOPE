@@ -11,13 +11,10 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 
-const CHALLENGE_TARGETS = [
-  { id: "barnards-star", name: "Barnard's Star", ra: 269.45208, dec: 4.69333, color: "#00F0FF", type: "High Proper Motion M-Dwarf", constell: "Ophiuchus", badge: "10.4″/yr Motion" },
-  { id: "wise-0855", name: "WISE 0855", ra: 133.79513, dec: -7.24515, color: "#38BDF8", type: "Coldest Brown Dwarf (Water Ice)", constell: "Hydra", badge: "Water Ice" },
-  { id: "epsilon-indi-b", name: "Epsilon Indi B", ra: 331.04375, dec: -56.78278, color: "#A855F7", type: "Substellar Binary Brown Dwarf", constell: "Indus", badge: "Brown Dwarf" },
-  { id: "rw-aurigae", name: "RW Aurigae", ra: 76.95642, dec: 30.40142, color: "#F59E0B", type: "Eruptive T Tauri Variable", constell: "Auriga", badge: "Variable YSO" },
-  { id: "r-draconis", name: "R Draconis", ra: 248.16750, dec: 66.75500, color: "#EC4899", type: "Mira Pulsating Giant Variable", constell: "Draco", badge: "Mira Giant" },
-];
+import { 
+  CELESTIAL_CATALOG, 
+  CHALLENGE_TARGETS 
+} from '../data/celestialCatalog';
 
 function raDecToGalactic(raDeg, decDeg) {
   const rad = Math.PI / 180;
@@ -106,9 +103,9 @@ export default function RealSkySurveyViewer({
 
       aladinInstanceRef.current = aladin;
 
-      // 1. Add Challenge Targets
+      // 1. Add Celestial Catalog Targets (Challenge + Extended)
       const cat = A.catalog({
-        name: 'NASA SPHEREx Challenge Targets',
+        name: 'COSMOSCOPE Celestial Objects',
         sourceSize: 18,
         color: '#00F0FF',
         onClick: (marker) => {
@@ -120,10 +117,10 @@ export default function RealSkySurveyViewer({
       aladin.addCatalog(cat);
       challengeCatalogRef.current = cat;
 
-      CHALLENGE_TARGETS.forEach(t => {
+      CELESTIAL_CATALOG.forEach(t => {
         const marker = A.marker(t.ra, t.dec, {
-          popupTitle: t.name,
-          popupDesc: `<strong>${t.type}</strong><br>Constellation: ${t.constell}<br>RA: ${t.ra.toFixed(4)}°, Dec: ${t.dec.toFixed(4)}°`,
+          popupTitle: t.isChallengeTarget ? `★ ${t.name} (NASA Challenge)` : t.name,
+          popupDesc: `<strong>${t.type}</strong><br>Constellation: ${t.constell}<br>RA: ${t.ra.toFixed(4)}°, Dec: ${t.dec.toFixed(4)}°<br>Badge: ${t.badge}`,
           data: t
         });
         cat.addSources([marker]);

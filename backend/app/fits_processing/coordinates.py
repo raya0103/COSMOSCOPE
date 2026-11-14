@@ -62,63 +62,22 @@ def parse_and_validate_coordinates(
 
 
 
+from .extended_targets import EXTENDED_ASTRONOMICAL_CATALOG
+
 # Curated Challenge Targets with authentic verified coordinates
 CHALLENGE_TARGETS_CATALOG = [
     {
-        "id": "barnards-star",
-        "name": "Barnard's Star",
-        "type": "High Proper Motion M-Dwarf",
-        "ra_deg": 269.45208,
-        "dec_deg": 4.69333,
-        "constellation": "Ophiuchus",
-        "spectral_type": "M4.0V",
-        "badge": "Proper Motion",
-        "description": "Second-closest stellar system to the Sun. Displays extreme proper motion of 10.39 arcsec/yr."
-    },
-    {
-        "id": "epsilon-indi-b",
-        "name": "Epsilon Indi B",
-        "type": "Substellar Binary Brown Dwarf",
-        "ra_deg": 331.04375,
-        "dec_deg": -56.78278,
-        "constellation": "Indus",
-        "spectral_type": "T1+T6",
-        "badge": "Brown Dwarf",
-        "description": "Substellar companion binary at 3.6 pc with strong methane and water vapor absorption."
-    },
-    {
-        "id": "wise-0855",
-        "name": "WISE 0855",
-        "type": "Sub-Zero Brown Dwarf (Water Ice)",
-        "ra_deg": 133.79513,
-        "dec_deg": -7.24515,
-        "constellation": "Hydra",
-        "spectral_type": "Y2",
-        "badge": "Water Ice",
-        "description": "Coldest known brown dwarf (~250 K) with atmospheric water ice clouds."
-    },
-    {
-        "id": "rw-aurigae",
-        "name": "RW Aurigae",
-        "type": "Eruptive T Tauri Variable",
-        "ra_deg": 76.95642,
-        "dec_deg": 30.40142,
-        "constellation": "Auriga",
-        "spectral_type": "K1-K4e",
-        "badge": "Variable YSO",
-        "description": "Active Young Stellar Object (YSO) exhibiting deep circumstellar dust obscuration events."
-    },
-    {
-        "id": "r-draconis",
-        "name": "R Draconis",
-        "type": "Mira Pulsating Giant Variable",
-        "ra_deg": 248.16750,
-        "dec_deg": 66.75500,
-        "constellation": "Draco",
-        "spectral_type": "M5e-M9e",
-        "badge": "Mira Giant",
-        "description": "Classical long-period pulsating red giant with ~245-day cycle in the northern continuous viewing zone."
+        "id": t["id"],
+        "name": t["name"],
+        "type": t["type"],
+        "ra_deg": t["ra_deg"],
+        "dec_deg": t["dec_deg"],
+        "constellation": t["constellation"],
+        "spectral_type": t["spectral_type"],
+        "badge": t["badge"],
+        "description": t["scientific_significance"]
     }
+    for t in EXTENDED_ASTRONOMICAL_CATALOG if t["is_challenge_target"]
 ]
 
 # Curated reference astronomical catalog with verified ICRS coordinates
@@ -180,13 +139,36 @@ def match_challenge_target(ra: float, dec: float, tolerance_deg: float = 0.08) -
 
     return best_target
 
+def match_extended_target(ra: float, dec: float, tolerance_deg: float = 0.08) -> Optional[dict]:
+    """
+    Checks if given coordinates match any of the 20 catalog targets within angular tolerance.
+    Default tolerance: 0.08 degrees (~4.8 arcminutes / 288 arcseconds).
+    """
+    tol_arcsec = tolerance_deg * 3600.0
+    best_target = None
+    min_dist_arcsec = float("inf")
+
+    for target in EXTENDED_ASTRONOMICAL_CATALOG:
+        sep_arcsec = angular_separation_arcsec(ra, dec, target["ra_deg"], target["dec_deg"])
+        if sep_arcsec <= tol_arcsec and sep_arcsec < min_dist_arcsec:
+            min_dist_arcsec = sep_arcsec
+            best_target = {
+                **target,
+                "separation_arcsec": round(sep_arcsec, 2),
+                "separation_arcmin": round(sep_arcsec / 60.0, 3),
+                "matched": True
+            }
+
+    return best_target
+
 def identify_object_by_coordinates(ra: float, dec: float, matching_radius_arcsec: float = 60.0) -> dict:
     """
     Feature: Real celestial object identification from sky coordinates.
     Evaluates:
       1. Challenge Target Catalog (within 0.08° / ~288" matching tolerance)
-      2. Authoritative Reference Catalog (within matching_radius_arcsec)
-      3. Returns 'Unidentified celestial position' if outside radius without fabricating names.
+      2. Extended Astronomical Catalog (within 0.08° / ~288" matching tolerance)
+      3. Authoritative Reference Catalog (within matching_radius_arcsec)
+      4. Returns 'Unidentified celestial position' if outside radius without fabricating names.
     """
     # 1. Check Challenge Targets first
     challenge_match = match_challenge_target(ra, dec, tolerance_deg=0.08)
@@ -199,6 +181,8 @@ def identify_object_by_coordinates(ra: float, dec: float, matching_radius_arcsec
             "constellation": challenge_match.get("constellation"),
             "is_challenge_target": True,
             "target_id": challenge_match["id"],
+            "category": challenge_match.get("category", "stars"),
+            "status": challenge_match.get("status", "VERIFIED MULTI-EPOCH COVERAGE"),
             "separation_arcsec": challenge_match["separation_arcsec"],
             "matching_radius_arcsec": matching_radius_arcsec,
             "identification_source": "NASA SPHEREx Challenge Target Catalogue",
@@ -206,7 +190,27 @@ def identify_object_by_coordinates(ra: float, dec: float, matching_radius_arcsec
             "reference_dec_deg": challenge_match["dec_deg"]
         }
 
-    # 2. Check Curated Reference Astronomical Catalog
+    # 2. Check Extended Astronomical Catalog (New Verified Objects)
+    ext_match = match_extended_target(ra, dec, tolerance_deg=0.08)
+    if ext_match:
+        return {
+            "matched": True,
+            "designation": ext_match["name"],
+            "target_name": ext_match["name"],
+            "object_type": ext_match["type"],
+            "constellation": ext_match.get("constellation"),
+            "is_challenge_target": ext_match.get("is_challenge_target", False),
+            "target_id": ext_match["id"],
+            "category": ext_match.get("category"),
+            "status": ext_match.get("status"),
+            "separation_arcsec": ext_match["separation_arcsec"],
+            "matching_radius_arcsec": matching_radius_arcsec,
+            "identification_source": "COSMOSCOPE Verified Astronomical Catalogue",
+            "reference_ra_deg": ext_match["ra_deg"],
+            "reference_dec_deg": ext_match["dec_deg"]
+        }
+
+    # 3. Check Curated Reference Astronomical Catalog
     best_ref = None
     min_ref_sep = float("inf")
     for ref in REFERENCE_ASTRONOMICAL_CATALOG:
@@ -231,7 +235,7 @@ def identify_object_by_coordinates(ra: float, dec: float, matching_radius_arcsec
             "reference_dec_deg": best_ref["dec"]
         }
 
-    # 3. Fallback: Unidentified Position (strictly honest, zero fabrication)
+    # 4. Fallback: Unidentified Position (strictly honest, zero fabrication)
     return {
         "matched": False,
         "designation": "Unidentified celestial position",
@@ -249,19 +253,31 @@ def identify_object_by_coordinates(ra: float, dec: float, matching_radius_arcsec
 
 def resolve_target_name(name: str) -> Optional[Tuple[float, float, str, str, str]]:
     """
-    Resolves astronomical target names to ICRS coordinates via CDS Sesame service or offline catalog.
+    Resolves astronomical target names to ICRS coordinates via Extended Catalog,
+    Reference Catalog, or CDS Sesame service.
     """
     clean_name = name.strip()
     lower_name = clean_name.lower()
+    lower_name_no_punct = lower_name.replace("'", "").replace("-", " ").replace("_", " ")
 
-    # Check Challenge Targets
-    for t in CHALLENGE_TARGETS_CATALOG:
-        if lower_name == t["name"].lower() or lower_name == t["id"].lower() or lower_name.replace("'", "") == t["name"].lower().replace("'", ""):
+    # Check Extended Catalog (both Challenge and Newly Added Targets)
+    for t in EXTENDED_ASTRONOMICAL_CATALOG:
+        match_keys = [
+            t["name"].lower(),
+            t["id"].lower(),
+            t["name"].lower().replace("'", ""),
+            t["id"].lower().replace("-", " ")
+        ]
+        if "designations" in t:
+            match_keys.extend([d.lower() for d in t["designations"]])
+
+        if lower_name in match_keys or lower_name_no_punct in [k.replace("'", "").replace("-", " ").replace("_", " ") for k in match_keys]:
             ra_deg, dec_deg = t["ra_deg"], t["dec_deg"]
             coord = SkyCoord(ra=ra_deg * u.deg, dec=dec_deg * u.deg, frame="icrs")
             ra_hms = coord.ra.to_string(unit=u.hour, sep=":", precision=2, pad=True)
             dec_dms = coord.dec.to_string(unit=u.deg, sep=":", precision=2, alwayssign=True, pad=True)
-            return ra_deg, dec_deg, ra_hms, dec_dms, "challenge_target_catalogue"
+            source = "challenge_target_catalogue" if t.get("is_challenge_target") else "extended_astronomical_catalogue"
+            return ra_deg, dec_deg, ra_hms, dec_dms, source
 
     # Check Reference Catalog
     for r in REFERENCE_ASTRONOMICAL_CATALOG:

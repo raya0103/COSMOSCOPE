@@ -10,13 +10,10 @@ import {
   Grid 
 } from 'lucide-react';
 
-const CHALLENGE_TARGETS = [
-  { id: "barnards-star", name: "Barnard's Star", ra: 269.45208, dec: 4.69333, color: "#00F0FF", type: "High Proper Motion M-Dwarf", constell: "Ophiuchus", badge: "10.4″/yr Motion" },
-  { id: "wise-0855", name: "WISE 0855", ra: 133.79513, dec: -7.24515, color: "#38BDF8", type: "Coldest Brown Dwarf (Water Ice)", constell: "Hydra", badge: "Water Ice" },
-  { id: "epsilon-indi-b", name: "Epsilon Indi B", ra: 331.04375, dec: -56.78278, color: "#A855F7", type: "Substellar Binary Brown Dwarf", constell: "Indus", badge: "Brown Dwarf" },
-  { id: "rw-aurigae", name: "RW Aurigae", ra: 76.95642, dec: 30.40142, color: "#F59E0B", type: "Eruptive T Tauri Variable", constell: "Auriga", badge: "Variable YSO" },
-  { id: "r-draconis", name: "R Draconis", ra: 248.16750, dec: 66.75500, color: "#EC4899", type: "Mira Pulsating Giant Variable", constell: "Draco", badge: "Mira Giant" },
-];
+import { 
+  CELESTIAL_CATALOG, 
+  CHALLENGE_TARGETS 
+} from '../data/celestialCatalog';
 
 // Helper to convert RA/Dec to Galactic coordinates (l, b)
 function raDecToGalactic(raDeg, decDeg) {
@@ -291,8 +288,8 @@ export default function GalaxyOverviewCanvas({
       ctx.restore();
     }
 
-    // 6. Five NASA Challenge Targets with Visible Markers and Labels
-    CHALLENGE_TARGETS.forEach(t => {
+    // 6. Astronomical Catalog Targets with Visible Markers and Labels
+    CELESTIAL_CATALOG.forEach(t => {
       const pt = project(t.ra, t.dec, width, height);
       if (pt.x < -50 || pt.x > width + 50 || pt.y < -50 || pt.y > height + 50) return;
 
@@ -301,7 +298,8 @@ export default function GalaxyOverviewCanvas({
 
       ctx.save();
       // Outer pulsating ring
-      const pulse = isSelected ? Math.sin(tSeconds * 3) * 3 + 15 : isHovered ? 14 : 9;
+      const basePulse = t.isChallengeTarget ? 10 : 7;
+      const pulse = isSelected ? Math.sin(tSeconds * 3) * 3 + 15 : isHovered ? 14 : basePulse;
       ctx.fillStyle = t.color + (isSelected ? '45' : isHovered ? '35' : '20');
       ctx.beginPath();
       ctx.arc(pt.x, pt.y, pulse, 0, Math.PI * 2);
@@ -309,20 +307,20 @@ export default function GalaxyOverviewCanvas({
 
       // Outer border circle
       ctx.strokeStyle = t.color;
-      ctx.lineWidth = isSelected ? 2 : 1;
+      ctx.lineWidth = isSelected ? 2 : (t.isChallengeTarget ? 1.5 : 1);
       ctx.beginPath();
-      ctx.arc(pt.x, pt.y, isSelected ? 9 : 5, 0, Math.PI * 2);
+      ctx.arc(pt.x, pt.y, isSelected ? 9 : (t.isChallengeTarget ? 6 : 4), 0, Math.PI * 2);
       ctx.stroke();
 
       // Core point
       ctx.fillStyle = isSelected ? '#FFFFFF' : t.color;
       ctx.beginPath();
-      ctx.arc(pt.x, pt.y, isSelected ? 4 : 3, 0, Math.PI * 2);
+      ctx.arc(pt.x, pt.y, isSelected ? 4 : (t.isChallengeTarget ? 3 : 2), 0, Math.PI * 2);
       ctx.fill();
 
       // Target Label
-      ctx.font = isSelected ? 'bold 11px Inter, sans-serif' : '10px Inter, sans-serif';
-      ctx.fillStyle = isSelected ? '#00F0FF' : '#E2E8F0';
+      ctx.font = isSelected ? 'bold 11px Inter, sans-serif' : (t.isChallengeTarget ? '600 10px Inter, sans-serif' : '9px Inter, sans-serif');
+      ctx.fillStyle = isSelected ? '#00F0FF' : (t.isChallengeTarget ? '#F1F5F9' : '#CBD5E1');
       ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
       ctx.shadowBlur = 4;
       ctx.fillText(t.name, pt.x + 10, pt.y - 4);
@@ -428,9 +426,9 @@ export default function GalaxyOverviewCanvas({
       onHoverCoord({ ra, dec, l: gal.l, b: gal.b });
     }
 
-    // Check hit test on 5 challenge targets
+    // Check hit test on celestial catalog targets
     let hit = null;
-    for (const t of CHALLENGE_TARGETS) {
+    for (const t of CELESTIAL_CATALOG) {
       const pt = project(t.ra, t.dec, canvas.width, canvas.height);
       const dist = Math.hypot(pt.x - x, pt.y - y);
       if (dist < 18) {
@@ -464,8 +462,8 @@ export default function GalaxyOverviewCanvas({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Check hit test on 5 challenge targets
-    for (const t of CHALLENGE_TARGETS) {
+    // Check hit test on celestial catalog targets
+    for (const t of CELESTIAL_CATALOG) {
       const pt = project(t.ra, t.dec, canvas.width, canvas.height);
       if (Math.hypot(pt.x - x, pt.y - y) < 18) {
         if (onSelectTarget) onSelectTarget(t.ra, t.dec, t.name);

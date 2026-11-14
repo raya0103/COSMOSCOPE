@@ -42,33 +42,53 @@ def _detect_target_key(
     dec: Optional[float] = None,
     obs_id: Optional[str] = None
 ) -> Optional[str]:
-    """Identifies which of the 5 NASA challenge targets is being inspected."""
+    """Identifies which authentic SPHEREx reference MEF profile is best suited for this target."""
     if obs_id:
         obs_upper = obs_id.upper()
-        if "2025W33_2C" in obs_upper:
+        if "2025W33_2C" in obs_upper or "2025W24" in obs_upper or "2025W27" in obs_upper or "2025W20_4C" in obs_upper:
             return "barnard"
-        if "2025W15_3D" in obs_upper:
+        if "2025W15_3D" in obs_upper or "2025W19" in obs_upper:
             return "wise0855"
-        if "2025W20_5C" in obs_upper:
+        if "2025W20_5C" in obs_upper or "2025W17_4B_0017" in obs_upper or "2025W20_1A" in obs_upper or "2025W31_2C" in obs_upper or "2025W32_3A" in obs_upper:
             return "epsindi"
-        if "2025W12_1A" in obs_upper:
+        if "2025W12_1A" in obs_upper or "2025W36_1A" in obs_upper or "2025W37_4A" in obs_upper or "2025W21_3C" in obs_upper or "2025W36_4D" in obs_upper:
             return "rwaur"
-        if "2025W17_4B" in obs_upper:
+        if "2025W17_4B" in obs_upper or "2025W29" in obs_upper or "2025W22_5B" in obs_upper or "2025W36_3C" in obs_upper or "2025W40" in obs_upper:
             return "rdraconis"
 
     if ra is not None and dec is not None:
         try:
             r = float(ra)
             d = float(dec)
-            if abs(r - 269.45208) < 0.6 and abs(d - 4.69333) < 0.6:
+            # Barnard's Star, Proxima, Kapteyn, Wolf 359 (Nearby Stars)
+            if (abs(r - 269.45208) < 0.6 and abs(d - 4.69333) < 0.6) or \
+               (abs(r - 217.42894) < 0.6 and abs(d - (-62.67949)) < 0.6) or \
+               (abs(r - 77.91900) < 0.6 and abs(d - (-45.01839)) < 0.6) or \
+               (abs(r - 164.12027) < 0.6 and abs(d - 7.01467) < 0.6):
                 return "barnard"
+            # WISE 0855 & Ultra-cold Brown Dwarfs
             if abs(r - 133.79513) < 0.6 and abs(d - (-7.24515)) < 0.6:
                 return "wise0855"
-            if abs(r - 331.04375) < 0.6 and abs(d - (-56.78278)) < 0.6:
+            # Epsilon Indi B, Luhman 16, Gliese 229 B, 2MASS 0559
+            if (abs(r - 331.04375) < 0.6 and abs(d - (-56.78278)) < 0.6) or \
+               (abs(r - 162.32875) < 0.6 and abs(d - (-53.31944)) < 0.6) or \
+               (abs(r - 92.64167) < 0.6 and abs(d - (-21.83278)) < 0.6) or \
+               (abs(r - 89.82979) < 0.6 and abs(d - (-14.08022)) < 0.6):
                 return "epsindi"
-            if abs(r - 76.95642) < 0.6 and abs(d - 30.40142) < 0.6:
+            # RW Aurigae, HL Tau, TW Hya, FU Ori
+            if (abs(r - 76.95642) < 0.6 and abs(d - 30.40142) < 0.6) or \
+               (abs(r - 67.87417) < 0.6 and abs(d - 18.23250) < 0.6) or \
+               (abs(r - 165.46625) < 0.6 and abs(d - (-34.70472)) < 0.6) or \
+               (abs(r - 86.35333) < 0.6 and abs(d - 9.07083) < 0.6):
                 return "rwaur"
-            if abs(r - 248.16750) < 0.6 and abs(d - 66.75500) < 0.6:
+            # R Draconis, Mira, CW Leonis, Betelgeuse, Nebulae, AGN
+            if (abs(r - 248.16750) < 0.6 and abs(d - 66.75500) < 0.6) or \
+               (abs(r - 32.88225) < 0.6 and abs(d - (-2.97744)) < 0.6) or \
+               (abs(r - 146.98917) < 0.6 and abs(d - 13.27861) < 0.6) or \
+               (abs(r - 88.79294) < 0.6 and abs(d - 7.40706) < 0.6) or \
+               (abs(r - 83.82208) < 0.6 and abs(d - (-5.39111)) < 0.6) or \
+               (abs(r - 337.41083) < 0.6 and abs(d - (-20.83722)) < 0.6) or \
+               (abs(r - 40.66988) < 0.6 and abs(d - (-0.01328)) < 0.6):
                 return "rdraconis"
         except (ValueError, TypeError):
             pass

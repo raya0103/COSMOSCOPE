@@ -24,6 +24,11 @@ from app.fits_processing.coordinates import (
     identify_object_by_coordinates,
     match_challenge_target
 )
+from app.fits_processing.extended_targets import (
+    get_targets,
+    get_target_by_id,
+    EXTENDED_ASTRONOMICAL_CATALOG
+)
 from app.data_access.irsa_client import (
     search_spherex_observations,
     query_gaia_sources,
@@ -62,75 +67,29 @@ def get_health():
     }
 
 @router.get("/targets")
-def get_featured_targets():
-    """Returns curated information and verified coordinates for the 5 challenge targets."""
-    return [
-        {
-            "id": "barnards-star",
-            "name": "Barnard's Star",
-            "type": "High Proper Motion M-Dwarf",
-            "ra_deg": 269.45208,
-            "dec_deg": 4.69333,
-            "ra_hms": "17:57:48.50",
-            "dec_dms": "+04:41:36.00",
-            "verified_observations_count": 364,
-            "scientific_significance": "Second-closest stellar system to the Sun. Displays extreme proper motion of 10.39 arcsec/yr.",
-            "recommended_fov_arcmin": 3.0,
-            "analysis_focus": "proper_motion"
-        },
-        {
-            "id": "epsilon-indi-b",
-            "name": "Epsilon Indi B",
-            "type": "Cold Brown Dwarf Binary",
-            "ra_deg": 331.04375,
-            "dec_deg": -56.78278,
-            "ra_hms": "22:04:10.50",
-            "dec_dms": "-56:46:58.00",
-            "verified_observations_count": 449,
-            "scientific_significance": "Substellar companion binary (T1 + T6 dwarfs) at 3.6 pc with strong methane and water ice bands.",
-            "recommended_fov_arcmin": 3.0,
-            "analysis_focus": "substellar_sed"
-        },
-        {
-            "id": "wise-0855",
-            "name": "WISE 0855-0714",
-            "type": "Sub-Zero Temperature Brown Dwarf",
-            "ra_deg": 133.79513,
-            "dec_deg": -7.24515,
-            "ra_hms": "08:55:10.83",
-            "dec_dms": "-07:14:42.53",
-            "verified_observations_count": 256,
-            "scientific_significance": "Fourth closest system to the Sun (~2.2 pc). Temperature around -13°C (260 K) with atmospheric water ice clouds.",
-            "recommended_fov_arcmin": 3.0,
-            "analysis_focus": "water_ice_clouds"
-        },
-        {
-            "id": "rw-aurigae",
-            "name": "RW Aurigae",
-            "type": "Eruptive T Tauri Variable",
-            "ra_deg": 76.95642,
-            "dec_deg": 30.40142,
-            "ra_hms": "05:07:49.54",
-            "dec_dms": "+30:24:05.10",
-            "verified_observations_count": 333,
-            "scientific_significance": "Active Young Stellar Object (YSO) showing catastrophic multi-magnitude dimming from circumstellar disk dust.",
-            "recommended_fov_arcmin": 3.0,
-            "analysis_focus": "photometric_variability"
-        },
-        {
-            "id": "r-draconis",
-            "name": "R Draconis",
-            "type": "Mira Pulsating Red Giant",
-            "ra_deg": 248.16750,
-            "dec_deg": 66.75500,
-            "ra_hms": "16:32:40.20",
-            "dec_dms": "+66:45:18.00",
-            "verified_observations_count": 2483,
-            "scientific_significance": "Classical long-period Mira variable with large amplitude flux oscillations (~245 days) in the northern continuous viewing zone.",
-            "recommended_fov_arcmin": 3.0,
-            "analysis_focus": "long_period_pulsation"
-        }
-    ]
+def get_featured_targets(
+    category: Optional[str] = Query(default=None, description="Filter by category (stars, brown_dwarfs, ysos, variables, nebulae_extragalactic)"),
+    challenge_only: bool = Query(default=False, description="Filter only original 5 challenge targets"),
+    status: Optional[str] = Query(default=None, description="Filter by coverage status"),
+    target_id: Optional[str] = Query(default=None, description="Retrieve specific target by slug ID")
+):
+    """
+    Returns curated information and verified coordinates for astronomical targets.
+    Includes the 5 NASA Space Apps challenge targets plus the extended catalogue of verified objects.
+    """
+    # Normalize when invoked directly as a Python function without FastAPI dependency resolution
+    tid = target_id if isinstance(target_id, str) and target_id else None
+    cat = category if isinstance(category, str) and category else None
+    stat = status if isinstance(status, str) and status else None
+    chal_only = challenge_only if isinstance(challenge_only, bool) else False
+
+    if tid:
+        target = get_target_by_id(tid)
+        if not target:
+            raise HTTPException(status_code=404, detail=f"Target '{tid}' not found.")
+        return target
+
+    return get_targets(category=cat, challenge_only=chal_only, status=stat)
 
 @router.get("/coordinates/identify")
 def identify_coordinates(

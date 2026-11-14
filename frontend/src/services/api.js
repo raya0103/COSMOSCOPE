@@ -29,7 +29,10 @@ async function fetchJson(endpoint, options = {}) {
 export const api = {
   getHealth: () => fetchJson('/health'),
   
-  getTargets: () => fetchJson('/targets'),
+  getTargets: (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return fetchJson(`/targets${q ? `?${q}` : ''}`);
+  },
   
   identifyCoordinates: (ra, dec, radiusArcsec = 60.0) => 
     fetchJson(`/coordinates/identify?ra=${ra}&dec=${dec}&radius_arcsec=${radiusArcsec}`),

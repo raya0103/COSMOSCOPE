@@ -1,25 +1,13 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Search, Compass, Sparkles, CheckCircle2, HelpCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Search, Compass, Sparkles, CheckCircle2, HelpCircle, Layers, Filter } from 'lucide-react';
 import { api } from '../services/api';
-
-const CHALLENGE_PRESETS = [
-  { id: "barnards-star", name: "Barnard's Star", ra: 269.45208, dec: 4.69333, badge: "Proper Motion" },
-  { id: "epsilon-indi-b", name: "Epsilon Indi B", ra: 331.04375, dec: -56.78278, badge: "Brown Dwarf" },
-  { id: "wise-0855", name: "WISE 0855", ra: 133.79513, dec: -7.24515, badge: "Water Ice" },
-  { id: "rw-aurigae", name: "RW Aurigae", ra: 76.95642, dec: 30.40142, badge: "Variable YSO" },
-  { id: "r-draconis", name: "R Draconis", ra: 248.16750, dec: 66.75500, badge: "Mira Giant" },
-];
-
-function computeAngularSeparationDeg(ra1, dec1, ra2, dec2) {
-  const rad = Math.PI / 180;
-  const d1 = dec1 * rad;
-  const d2 = dec2 * rad;
-  const da = (ra2 - ra1) * rad;
-  const dd = (dec2 - dec1) * rad;
-  const a = Math.sin(dd / 2) ** 2 + Math.cos(d1) * Math.cos(d2) * (Math.sin(da / 2) ** 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
-  return c / rad;
-}
+import { 
+  CELESTIAL_CATALOG, 
+  CHALLENGE_TARGETS, 
+  CELESTIAL_CATEGORIES, 
+  findTargetByCoords, 
+  getTargetsByCategory 
+} from '../data/celestialCatalog';
 
 export default function SearchHeader({ 
   onSearch, 
@@ -35,6 +23,9 @@ export default function SearchHeader({
   const [targetName, setTargetName] = useState(initialName);
   const [identSource, setIdentSource] = useState(null);
   const [validationError, setValidationError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState("challenge");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef(null);
 
   // Synchronize state when initial props change
   useEffect(() => {
@@ -46,46 +37,59 @@ export default function SearchHeader({
     }
   }, [initialRa, initialDec, initialName, initialFov]);
 
-  // Real-time Challenge Target Recognition from coordinates
-  const matchedChallenge = useMemo(() => {
-    const numRa = parseFloat(ra);
-    const numDec = parseFloat(dec);
-    if (isNaN(numRa) || isNaN(numDec)) return null;
-
-    for (const p of CHALLENGE_PRESETS) {
-      const sepDeg = computeAngularSeparationDeg(numRa, numDec, p.ra, p.dec);
-      // Tolerance: 0.08° (~4.8 arcminutes / 288 arcseconds)
-      if (sepDeg <= 0.08) {
-        return {
-          ...p,
-          sepArcsec: (sepDeg * 3600).toFixed(1),
-          sepArcmin: (sepDeg * 60).toFixed(2)
-        };
+  // Click outside suggestions listener
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+        setShowSuggestions(false);
       }
     }
-    return null;
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Real-time Celestial Target Recognition from coordinates
+  const matchedTarget = useMemo(() => {
+    return findTargetByCoords(ra, dec, 0.08);
   }, [ra, dec]);
 
-  // If coordinates match a challenge target, synchronize target name
+  // If coordinates match a known catalog target, synchronize target name
   useEffect(() => {
-    if (matchedChallenge) {
-      setTargetName(matchedChallenge.name);
-      setIdentSource(`NASA Challenge Target (within ${matchedChallenge.sepArcmin}′ tolerance)`);
+    if (matchedTarget) {
+      setTargetName(matchedTarget.name);
+      const prefix = matchedTarget.isChallengeTarget ? "NASA Challenge Target" : "Verified Catalog Object";
+      setIdentSource(`${prefix} (${matchedTarget.badge}, within ${matchedTarget.sepArcmin}′)`);
     } else {
-      if (CHALLENGE_PRESETS.some(p => p.name === targetName)) {
-        // If moved away from the challenge target, mark as uncatalogued or coordinate field
+      if (CELESTIAL_CATALOG.some(p => p.name === targetName)) {
         const numRa = parseFloat(ra);
         const numDec = parseFloat(dec);
         if (!isNaN(numRa) && !isNaN(numDec)) {
           setTargetName(`RA ${numRa.toFixed(4)}°, Dec ${numDec.toFixed(4)}°`);
-          setIdentSource('Coordinate search (outside challenge tolerance)');
+          setIdentSource('Coordinate search (outside catalog tolerance)');
         }
       }
     }
-  }, [matchedChallenge]);
+  }, [matchedTarget]);
+
+  // Filtered target presets based on selected category tab
+  const displayedPresets = useMemo(() => {
+    return getTargetsByCategory(activeCategory);
+  }, [activeCategory]);
+
+  // Autocomplete suggestions based on input text
+  const suggestions = useMemo(() => {
+    if (!targetName || targetName.length < 2 || targetName.startsWith("RA ")) return [];
+    const q = targetName.toLowerCase();
+    return CELESTIAL_CATALOG.filter(t => 
+      t.name.toLowerCase().includes(q) || 
+      t.id.toLowerCase().includes(q) || 
+      t.designations.some(d => d.toLowerCase().includes(q))
+    ).slice(0, 6);
+  }, [targetName]);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
+    setShowSuggestions(false);
     setValidationError(null);
 
     const numRa = parseFloat(ra);
@@ -101,8 +105,8 @@ export default function SearchHeader({
     }
 
     let finalName = targetName;
-    if (matchedChallenge) {
-      finalName = matchedChallenge.name;
+    if (matchedTarget) {
+      finalName = matchedTarget.name;
     } else if (!finalName || finalName.trim() === "" || finalName.startsWith("RA ")) {
       // Query coordinate identification endpoint
       try {
@@ -130,10 +134,12 @@ export default function SearchHeader({
   };
 
   const handleSelectPreset = (preset) => {
+    setShowSuggestions(false);
     setRa(preset.ra.toString());
     setDec(preset.dec.toString());
     setTargetName(preset.name);
-    setIdentSource(`NASA Challenge Target: ${preset.name}`);
+    const tag = preset.isChallengeTarget ? "NASA Challenge Target" : "Catalog Target";
+    setIdentSource(`${tag}: ${preset.name} (${preset.badge})`);
     setValidationError(null);
     onSearch({
       ra: preset.ra.toString(),
@@ -146,26 +152,56 @@ export default function SearchHeader({
   return (
     <div className="bg-space-900/90 rounded-2xl border border-space-border p-5 backdrop-blur-md shadow-2xl">
       
-      {/* Challenge Target Quick Selector */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Challenge Targets:</span>
-        </span>
-        <div className="flex flex-wrap gap-2">
-          {CHALLENGE_PRESETS.map((p) => {
-            const isSelected = matchedChallenge?.name === p.name || targetName === p.name;
+      {/* Category Tabs & Quick Target Selector */}
+      <div className="mb-4">
+        {/* Category Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 pb-2 border-b border-space-800">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Target Catalog:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1">
+            {CELESTIAL_CATEGORIES.map((cat) => {
+              const isActive = activeCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1 ${
+                    isActive
+                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_8px_rgba(0,240,255,0.2)]'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-space-800'
+                  }`}
+                >
+                  <span>{cat.label}</span>
+                  <span className="text-[10px] opacity-70">({cat.count})</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Quick Pick Target Chips */}
+        <div className="flex flex-wrap gap-1.5 max-h-[96px] overflow-y-auto pr-1">
+          {displayedPresets.map((p) => {
+            const isSelected = matchedTarget?.name === p.name || targetName === p.name;
             return (
               <button
-                key={p.name}
+                key={p.id}
                 type="button"
                 onClick={() => handleSelectPreset(p)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
                   isSelected
                     ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.3)] font-semibold'
                     : 'bg-space-850 text-slate-300 border-space-border hover:bg-space-800 hover:text-white'
                 }`}
+                title={`${p.name} (${p.type}) in ${p.constell}`}
               >
+                {p.isChallengeTarget && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" title="NASA Challenge Target" />
+                )}
                 <span>{p.name}</span>
                 <span className="text-[10px] text-slate-400 opacity-75">({p.badge})</span>
               </button>
@@ -184,8 +220,8 @@ export default function SearchHeader({
       {/* Coordinate Search Form */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
         
-        {/* Target / Object Designation */}
-        <div className="md:col-span-3">
+        {/* Target / Object Designation with Autocomplete */}
+        <div className="md:col-span-3 relative" ref={suggestionsRef}>
           <div className="flex items-center justify-between mb-1">
             <label className="block text-xs font-medium text-slate-300">
               Target Designation
@@ -199,10 +235,42 @@ export default function SearchHeader({
           <input
             type="text"
             value={targetName}
-            onChange={(e) => setTargetName(e.target.value)}
-            placeholder="e.g. Barnard's Star, M101"
+            onFocus={() => setShowSuggestions(true)}
+            onChange={(e) => {
+              setTargetName(e.target.value);
+              setShowSuggestions(true);
+            }}
+            placeholder="e.g. Barnard's Star, Proxima, HL Tau"
             className="w-full px-3 py-2 rounded-xl bg-space-950 border border-space-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 font-mono transition-colors"
           />
+
+          {/* Autocomplete suggestions dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-1.5 bg-space-900 border border-space-border rounded-xl shadow-2xl z-50 overflow-hidden divide-y divide-space-800">
+              {suggestions.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => handleSelectPreset(item)}
+                  className="p-2.5 hover:bg-space-800/80 cursor-pointer transition-colors flex items-center justify-between gap-2"
+                >
+                  <div>
+                    <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                      {item.isChallengeTarget && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/40">
+                          NASA Challenge
+                        </span>
+                      )}
+                      <span>{item.name}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">{item.type} • {item.constell}</div>
+                  </div>
+                  <span className="text-[10px] font-mono text-cyan-400 bg-space-950 px-2 py-0.5 rounded border border-space-800">
+                    {item.badge}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Ascension */}
