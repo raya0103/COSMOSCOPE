@@ -132,40 +132,42 @@ export default function FullPageGalaxyBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
       {/* 1. Deep Cosmic Void Background Mesh */}
-      <div className="absolute inset-0 bg-[#030712] dark:bg-[#030712] transition-colors duration-500" />
+      <div className="absolute inset-0 bg-[#030712] transition-colors duration-500" />
 
       {/* 2. Layered Milky Way Galactic Band & Interstellar Dust (Angled Cosmic Structure) */}
-      {/* Dark Mode Galaxy Textures */}
-      <div className="hidden dark:block absolute inset-0">
-        {/* Core diagonal galactic plane */}
-        <div 
-          className="absolute -inset-[30%] opacity-45 bg-[radial-gradient(ellipse_at_45%_50%,rgba(0,240,255,0.12)_0%,rgba(15,23,64,0.7)_35%,rgba(20,15,48,0.5)_55%,transparent_75%)] blur-3xl transform -rotate-12 transition-opacity duration-700" 
-        />
-        {/* Secondary diffuse nebular dust cloud */}
-        <div 
-          className="absolute -inset-[20%] opacity-35 bg-[radial-gradient(ellipse_at_70%_35%,rgba(168,85,247,0.12)_0%,rgba(56,189,248,0.08)_35%,transparent_65%)] blur-2xl transform rotate-6 transition-opacity duration-700" 
-        />
-        {/* Ambient deep celestial indigo gradient */}
-        <div 
-          className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(14,165,233,0.08)_0%,transparent_50%),radial-gradient(circle_at_80%_20%,rgba(124,58,237,0.08)_0%,transparent_50%)]" 
-        />
-      </div>
-
-      {/* Light Mode Galaxy Textures: Soft Pale Sky & Lavender Astronomical Atlas */}
-      <div className="dark:hidden absolute inset-0 bg-[#f4f7fb] transition-colors duration-500">
-        {/* Subtle pale sky celestial wash */}
-        <div 
-          className="absolute -inset-[25%] opacity-70 bg-[radial-gradient(ellipse_at_35%_45%,rgba(2,132,199,0.08)_0%,rgba(224,242,254,0.6)_35%,transparent_70%)] blur-3xl transform -rotate-12" 
-        />
-        {/* Subtle soft lavender galactic veil */}
-        <div 
-          className="absolute -inset-[20%] opacity-60 bg-[radial-gradient(ellipse_at_75%_55%,rgba(124,58,237,0.06)_0%,rgba(243,232,255,0.5)_40%,transparent_65%)] blur-2xl transform rotate-6" 
-        />
-        {/* Soft atmospheric gradient mesh */}
-        <div 
-          className="absolute inset-0 bg-gradient-to-b from-[#f4f7fb]/90 via-[#edf2f8]/85 to-[#f4f7fb]/95" 
-        />
-      </div>
+      {theme === 'dark' ? (
+        /* Dark Mode Galaxy Textures */
+        <div className="absolute inset-0">
+          {/* Core diagonal galactic plane */}
+          <div 
+            className="absolute -inset-[30%] opacity-55 bg-[radial-gradient(ellipse_at_45%_50%,rgba(0,240,255,0.14)_0%,rgba(15,23,64,0.75)_35%,rgba(20,15,48,0.55)_55%,transparent_75%)] blur-3xl transform -rotate-12 transition-opacity duration-700" 
+          />
+          {/* Secondary diffuse nebular dust cloud */}
+          <div 
+            className="absolute -inset-[20%] opacity-40 bg-[radial-gradient(ellipse_at_70%_35%,rgba(168,85,247,0.14)_0%,rgba(56,189,248,0.1)_35%,transparent_65%)] blur-2xl transform rotate-6 transition-opacity duration-700" 
+          />
+          {/* Ambient deep celestial indigo gradient */}
+          <div 
+            className="absolute inset-0 bg-[radial-gradient(circle_at_20%_80%,rgba(14,165,233,0.08)_0%,transparent_50%),radial-gradient(circle_at_80%_20%,rgba(124,58,237,0.08)_0%,transparent_50%)]" 
+          />
+        </div>
+      ) : (
+        /* Light Mode Galaxy Textures: Soft Pale Sky & Lavender Astronomical Atlas */
+        <div className="absolute inset-0 bg-[#f4f7fb] transition-colors duration-500">
+          {/* Subtle pale sky celestial wash */}
+          <div 
+            className="absolute -inset-[25%] opacity-70 bg-[radial-gradient(ellipse_at_35%_45%,rgba(2,132,199,0.08)_0%,rgba(224,242,254,0.6)_35%,transparent_70%)] blur-3xl transform -rotate-12" 
+          />
+          {/* Subtle soft lavender galactic veil */}
+          <div 
+            className="absolute -inset-[20%] opacity-60 bg-[radial-gradient(ellipse_at_75%_55%,rgba(124,58,237,0.06)_0%,rgba(243,232,255,0.5)_40%,transparent_65%)] blur-2xl transform rotate-6" 
+          />
+          {/* Soft atmospheric gradient mesh */}
+          <div 
+            className="absolute inset-0 bg-gradient-to-b from-[#f4f7fb]/90 via-[#edf2f8]/85 to-[#f4f7fb]/95" 
+          />
+        </div>
+      )}
 
       {/* 3. Full-Page Interactive Twinkling & Parallax Starfield Canvas */}
       <canvas 
