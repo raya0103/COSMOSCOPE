@@ -18,7 +18,12 @@ from app.models.schemas import (
     MultiMissionResponse,
     ImageOperationRequest
 )
-from app.fits_processing.coordinates import parse_and_validate_coordinates, resolve_target_name
+from app.fits_processing.coordinates import (
+    parse_and_validate_coordinates,
+    resolve_target_name,
+    identify_object_by_coordinates,
+    match_challenge_target
+)
 from app.data_access.irsa_client import (
     search_spherex_observations,
     query_gaia_sources,
@@ -127,6 +132,25 @@ def get_featured_targets():
         }
     ]
 
+@router.get("/coordinates/identify")
+def identify_coordinates(
+    ra: float = Query(..., description="Right Ascension in decimal degrees [0, 360]"),
+    dec: float = Query(..., description="Declination in decimal degrees [-90, +90]"),
+    radius_arcsec: float = Query(default=60.0, description="Matching radius in arcseconds")
+):
+    """
+    Feature: Real celestial object identification from sky coordinates.
+    Recognises the 5 challenge targets, curated reference catalogue objects,
+    or returns honest 'Unidentified celestial position' if outside tolerance.
+    """
+    if not (0.0 <= ra <= 360.0):
+        raise HTTPException(status_code=400, detail=f"Right Ascension {ra}° is out of bounds [0, 360].")
+    if not (-90.0 <= dec <= 90.0):
+        raise HTTPException(status_code=400, detail=f"Declination {dec}° is out of bounds [-90, +90].")
+    
+    result = identify_object_by_coordinates(ra, dec, matching_radius_arcsec=radius_arcsec)
+    return result
+
 @router.get("/coordinates/resolve")
 def resolve_coordinates(query: str = Query(...)):
     """
@@ -138,22 +162,31 @@ def resolve_coordinates(query: str = Query(...)):
             parts = [p.strip() for p in query.replace(",", " ").split() if p.strip()]
             if len(parts) >= 2:
                 ra_deg, dec_deg, ra_hms, dec_dms, resolved_by = parse_and_validate_coordinates(parts[0], parts[1])
+                ident = identify_object_by_coordinates(ra_deg, dec_deg)
+                target_name = ident["designation"] if ident["matched"] else query
                 return {
-                    "target_name": query,
+                    "target_name": target_name,
                     "ra": ra_deg,
                     "dec": dec_deg,
                     "ra_hms": ra_hms,
                     "dec_dms": dec_dms,
-                    "resolved_by": resolved_by
+                    "resolved_by": resolved_by,
+                    "is_challenge_target": ident.get("is_challenge_target", False),
+                    "challenge_target_id": ident.get("target_id"),
+                    "identification_source": ident.get("identification_source")
                 }
         ra_deg, dec_deg, ra_hms, dec_dms, resolved_by = parse_and_validate_coordinates("", "", target_name=query)
+        ident = identify_object_by_coordinates(ra_deg, dec_deg)
         return {
             "target_name": query,
             "ra": ra_deg,
             "dec": dec_deg,
             "ra_hms": ra_hms,
             "dec_dms": dec_dms,
-            "resolved_by": resolved_by
+            "resolved_by": resolved_by,
+            "is_challenge_target": ident.get("is_challenge_target", False),
+            "challenge_target_id": ident.get("target_id"),
+            "identification_source": ident.get("identification_source")
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -171,6 +204,17 @@ def search_observations(query: CoordinateInput):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
         
+    # Automatic challenge target / object identification
+    ident = identify_object_by_coordinates(ra_deg, dec_deg)
+    final_target_name = query.target_name
+    is_challenge = ident.get("is_challenge_target", False)
+    challenge_id = ident.get("target_id")
+    
+    if is_challenge:
+        final_target_name = ident.get("designation") or ident.get("target_name")
+    elif not final_target_name or final_target_name.strip() == "" or "Coord" in str(final_target_name):
+        final_target_name = ident.get("designation") if ident.get("matched") else f"RA {ra_deg:.4f}°, Dec {dec_deg:.4f}°"
+
     raw_obs = search_spherex_observations(ra_deg, dec_deg, limit=60)
     
     # Process metadata summary
@@ -210,7 +254,7 @@ def search_observations(query: CoordinateInput):
         ))
 
     # Evaluate multi-epoch comparison feasibility
-    is_challenge_target = (
+    is_challenge_target = is_challenge or (
         abs(ra_deg - 269.45208) < 0.6 and abs(dec_deg - 4.69333) < 0.6 or
         abs(ra_deg - 133.79513) < 0.6 and abs(dec_deg - (-7.24515)) < 0.6 or
         abs(ra_deg - 248.16750) < 0.6 and abs(dec_deg - 66.75500) < 0.6 or
@@ -241,8 +285,11 @@ def search_observations(query: CoordinateInput):
             dec_deg=dec_deg,
             ra_hms=ra_hms,
             dec_dms=dec_dms,
-            target_name=query.target_name,
-            resolved_by=resolved_by
+            target_name=final_target_name,
+            resolved_by=resolved_by,
+            is_challenge_target=is_challenge,
+            challenge_target_id=challenge_id,
+            identification_source=ident.get("identification_source")
         ),
         total_observations=total,
         epochs_count=total,

@@ -60,6 +60,15 @@ export default function SkyExplorer() {
       setSearchData(res);
       setLoading(false);
 
+      if (res.target && res.target.target_name && res.target.target_name !== params.target_name) {
+        setSearchParams({
+          ra: params.ra,
+          dec: params.dec,
+          fov: params.fov_arcmin,
+          name: res.target.target_name
+        });
+      }
+
       if (res.observations && res.observations.length > 0) {
         setSelectedObs(res.observations[0]);
         loadImage(res.observations[0].obs_id, res.target.ra_deg, res.target.dec_deg, params.fov_arcmin);
@@ -114,9 +123,10 @@ export default function SkyExplorer() {
       <SearchHeader
         onSearch={executeSearch}
         loading={loading}
-        initialRa={initialRa}
-        initialDec={initialDec}
-        initialName={initialName}
+        initialRa={currentRa.toString()}
+        initialDec={currentDec.toString()}
+        initialName={currentName}
+        initialFov={initialFov}
       />
 
       {/* 2. Interactive Astronomy Research Laboratory: 6 Pillars Workflow Ribbon */}

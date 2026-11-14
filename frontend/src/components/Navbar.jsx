@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { 
+  Home,
   Telescope, 
   Clock, 
   Activity, 
@@ -9,7 +10,6 @@ import {
   Globe2, 
   BookOpen, 
   FileCheck2, 
-  Radio,
   Sun,
   Moon,
   AlertTriangle,
@@ -20,7 +20,7 @@ import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 
 const navItems = [
-  { name: 'Mission Control', path: '/', icon: Radio },
+  { name: 'Home', path: '/', icon: Home, isHome: true },
   { name: 'Sky Explorer', path: '/explorer', icon: Telescope },
   { name: 'Time Machine', path: '/time-machine', icon: Clock },
   { name: 'Spectral Lab', path: '/spectral-lab', icon: Activity },
@@ -91,6 +91,24 @@ export default function Navbar() {
           <nav className="hidden xl:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
+              if (item.isHome) {
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    title="Home"
+                    aria-label="Home"
+                    className={({ isActive }) => `
+                      flex items-center justify-center p-2 rounded-lg text-xs font-medium transition-all
+                      ${isActive 
+                        ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 shadow-[0_0_12px_rgba(0,240,255,0.15)] font-semibold' 
+                        : 'text-slate-300 hover:text-cyan-300 hover:bg-space-850 border border-transparent'}
+                    `}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </NavLink>
+                );
+              }
               return (
                 <NavLink
                   key={item.path}
@@ -109,7 +127,7 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Right Controls: Theme Toggle & IRSA Badge */}
+          {/* Right Controls: Theme Toggle */}
           <div className="flex items-center gap-3">
             {/* Theme Toggle Button */}
             <button
@@ -124,17 +142,6 @@ export default function Navbar() {
                 <Moon className="w-4 h-4 text-violet-500" />
               )}
             </button>
-
-            {/* Backend & IRSA Live Connection Pill */}
-            <div className={`flex items-center gap-2 px-2.5 py-1 rounded-full border text-[11px] font-mono transition-colors ${
-              backendOnline 
-                ? 'bg-space-900 border-emerald-500/30 text-emerald-400' 
-                : 'bg-rose-950/40 border-rose-500/40 text-rose-400 animate-pulse'
-            }`}>
-              <span className={`w-2 h-2 rounded-full ${backendOnline ? 'bg-emerald-400 animate-pulse' : 'bg-rose-500'}`} />
-              <span className="hidden sm:inline">{backendOnline ? 'IRSA & API LIVE' : 'BACKEND OFFLINE'}</span>
-              <span className="text-slate-400">{backendOnline ? 'QR2/QR3' : 'PORT 8000'}</span>
-            </div>
           </div>
 
         </div>

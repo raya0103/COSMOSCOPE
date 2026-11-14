@@ -17,6 +17,9 @@ class TargetCoordinate(BaseModel):
     dec_dms: str
     target_name: Optional[str] = None
     resolved_by: str = "direct"
+    is_challenge_target: bool = False
+    challenge_target_id: Optional[str] = None
+    identification_source: Optional[str] = None
 
 class ObservationRecord(BaseModel):
     obs_id: str

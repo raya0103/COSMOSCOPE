@@ -31,6 +31,9 @@ export const api = {
   
   getTargets: () => fetchJson('/targets'),
   
+  identifyCoordinates: (ra, dec, radiusArcsec = 60.0) => 
+    fetchJson(`/coordinates/identify?ra=${ra}&dec=${dec}&radius_arcsec=${radiusArcsec}`),
+  
   searchObservations: (params) => 
     fetchJson('/observations/search', {
       method: 'POST',

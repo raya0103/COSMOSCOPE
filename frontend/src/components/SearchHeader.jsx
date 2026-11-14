@@ -1,13 +1,25 @@
-import React, { useState } from 'react';
-import { Search, Compass, Sparkles, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Search, Compass, Sparkles, CheckCircle2, HelpCircle } from 'lucide-react';
+import { api } from '../services/api';
 
 const CHALLENGE_PRESETS = [
-  { name: "Barnard's Star", ra: "269.45208", dec: "4.69333", badge: "Proper Motion" },
-  { name: "Epsilon Indi B", ra: "331.04375", dec: "-56.78278", badge: "Brown Dwarf" },
-  { name: "WISE 0855", ra: "133.79513", dec: "-7.24515", badge: "Water Ice" },
-  { name: "RW Aurigae", ra: "76.95642", dec: "30.40142", badge: "Variable YSO" },
-  { name: "R Draconis", ra: "248.16750", dec: "66.75500", badge: "Mira Giant" },
+  { id: "barnards-star", name: "Barnard's Star", ra: 269.45208, dec: 4.69333, badge: "Proper Motion" },
+  { id: "epsilon-indi-b", name: "Epsilon Indi B", ra: 331.04375, dec: -56.78278, badge: "Brown Dwarf" },
+  { id: "wise-0855", name: "WISE 0855", ra: 133.79513, dec: -7.24515, badge: "Water Ice" },
+  { id: "rw-aurigae", name: "RW Aurigae", ra: 76.95642, dec: 30.40142, badge: "Variable YSO" },
+  { id: "r-draconis", name: "R Draconis", ra: 248.16750, dec: 66.75500, badge: "Mira Giant" },
 ];
+
+function computeAngularSeparationDeg(ra1, dec1, ra2, dec2) {
+  const rad = Math.PI / 180;
+  const d1 = dec1 * rad;
+  const d2 = dec2 * rad;
+  const da = (ra2 - ra1) * rad;
+  const dd = (dec2 - dec1) * rad;
+  const a = Math.sin(dd / 2) ** 2 + Math.cos(d1) * Math.cos(d2) * (Math.sin(da / 2) ** 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
+  return c / rad;
+}
 
 export default function SearchHeader({ 
   onSearch, 
@@ -21,8 +33,11 @@ export default function SearchHeader({
   const [dec, setDec] = useState(initialDec);
   const [fov, setFov] = useState(initialFov);
   const [targetName, setTargetName] = useState(initialName);
+  const [identSource, setIdentSource] = useState(null);
+  const [validationError, setValidationError] = useState(null);
 
-  React.useEffect(() => {
+  // Synchronize state when initial props change
+  useEffect(() => {
     setRa(initialRa);
     setDec(initialDec);
     setTargetName(initialName);
@@ -31,17 +46,101 @@ export default function SearchHeader({
     }
   }, [initialRa, initialDec, initialName, initialFov]);
 
-  const handleSubmit = (e) => {
+  // Real-time Challenge Target Recognition from coordinates
+  const matchedChallenge = useMemo(() => {
+    const numRa = parseFloat(ra);
+    const numDec = parseFloat(dec);
+    if (isNaN(numRa) || isNaN(numDec)) return null;
+
+    for (const p of CHALLENGE_PRESETS) {
+      const sepDeg = computeAngularSeparationDeg(numRa, numDec, p.ra, p.dec);
+      // Tolerance: 0.08° (~4.8 arcminutes / 288 arcseconds)
+      if (sepDeg <= 0.08) {
+        return {
+          ...p,
+          sepArcsec: (sepDeg * 3600).toFixed(1),
+          sepArcmin: (sepDeg * 60).toFixed(2)
+        };
+      }
+    }
+    return null;
+  }, [ra, dec]);
+
+  // If coordinates match a challenge target, synchronize target name
+  useEffect(() => {
+    if (matchedChallenge) {
+      setTargetName(matchedChallenge.name);
+      setIdentSource(`NASA Challenge Target (within ${matchedChallenge.sepArcmin}′ tolerance)`);
+    } else {
+      if (CHALLENGE_PRESETS.some(p => p.name === targetName)) {
+        // If moved away from the challenge target, mark as uncatalogued or coordinate field
+        const numRa = parseFloat(ra);
+        const numDec = parseFloat(dec);
+        if (!isNaN(numRa) && !isNaN(numDec)) {
+          setTargetName(`RA ${numRa.toFixed(4)}°, Dec ${numDec.toFixed(4)}°`);
+          setIdentSource('Coordinate search (outside challenge tolerance)');
+        }
+      }
+    }
+  }, [matchedChallenge]);
+
+  const handleSubmit = async (e) => {
     e?.preventDefault();
-    if (!ra || !dec) return;
-    onSearch({ ra, dec, fov_arcmin: parseFloat(fov), target_name: targetName });
+    setValidationError(null);
+
+    const numRa = parseFloat(ra);
+    const numDec = parseFloat(dec);
+
+    if (isNaN(numRa) || numRa < 0 || numRa > 360) {
+      setValidationError("Right Ascension must be between 0.0° and 360.0°");
+      return;
+    }
+    if (isNaN(numDec) || numDec < -90 || numDec > 90) {
+      setValidationError("Declination must be between -90.0° and +90.0°");
+      return;
+    }
+
+    let finalName = targetName;
+    if (matchedChallenge) {
+      finalName = matchedChallenge.name;
+    } else if (!finalName || finalName.trim() === "" || finalName.startsWith("RA ")) {
+      // Query coordinate identification endpoint
+      try {
+        const ident = await api.identifyCoordinates(numRa, numDec, 60.0);
+        if (ident && ident.matched) {
+          finalName = ident.designation;
+          setTargetName(finalName);
+          setIdentSource(`${ident.identification_source} (within ${(ident.separation_arcsec || 0).toFixed(1)}″)`);
+        } else {
+          finalName = `RA ${numRa.toFixed(4)}°, Dec ${numDec.toFixed(4)}°`;
+          setTargetName(finalName);
+          setIdentSource('Uncatalogued Field Position');
+        }
+      } catch (err) {
+        console.warn("Coordinate identification lookup failed:", err);
+      }
+    }
+
+    onSearch({
+      ra: numRa.toString(),
+      dec: numDec.toString(),
+      fov_arcmin: parseFloat(fov),
+      target_name: finalName
+    });
   };
 
   const handleSelectPreset = (preset) => {
-    setRa(preset.ra);
-    setDec(preset.dec);
+    setRa(preset.ra.toString());
+    setDec(preset.dec.toString());
     setTargetName(preset.name);
-    onSearch({ ra: preset.ra, dec: preset.dec, fov_arcmin: parseFloat(fov), target_name: preset.name });
+    setIdentSource(`NASA Challenge Target: ${preset.name}`);
+    setValidationError(null);
+    onSearch({
+      ra: preset.ra.toString(),
+      dec: preset.dec.toString(),
+      fov_arcmin: parseFloat(fov),
+      target_name: preset.name
+    });
   };
 
   return (
@@ -54,32 +153,49 @@ export default function SearchHeader({
           <span>Challenge Targets:</span>
         </span>
         <div className="flex flex-wrap gap-2">
-          {CHALLENGE_PRESETS.map((p) => (
-            <button
-              key={p.name}
-              type="button"
-              onClick={() => handleSelectPreset(p)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
-                targetName === p.name
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-[0_0_10px_rgba(0,240,255,0.2)]'
-                  : 'bg-space-850 text-slate-300 border-space-border hover:bg-space-800 hover:text-white'
-              }`}
-            >
-              <span>{p.name}</span>
-              <span className="text-[10px] text-slate-400 opacity-75">({p.badge})</span>
-            </button>
-          ))}
+          {CHALLENGE_PRESETS.map((p) => {
+            const isSelected = matchedChallenge?.name === p.name || targetName === p.name;
+            return (
+              <button
+                key={p.name}
+                type="button"
+                onClick={() => handleSelectPreset(p)}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
+                  isSelected
+                    ? 'bg-cyan-500/25 text-cyan-300 border-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.3)] font-semibold'
+                    : 'bg-space-850 text-slate-300 border-space-border hover:bg-space-800 hover:text-white'
+                }`}
+              >
+                <span>{p.name}</span>
+                <span className="text-[10px] text-slate-400 opacity-75">({p.badge})</span>
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {validationError && (
+        <div className="mb-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+          <span>{validationError}</span>
+        </div>
+      )}
 
       {/* Coordinate Search Form */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
         
         {/* Target / Object Designation */}
         <div className="md:col-span-3">
-          <label className="block text-xs font-medium text-slate-300 mb-1">
-            Target Designation
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-xs font-medium text-slate-300">
+              Target Designation
+            </label>
+            {identSource && (
+              <span className="text-[10px] text-cyan-400 font-mono truncate max-w-[150px]" title={identSource}>
+                {identSource}
+              </span>
+            )}
+          </div>
           <input
             type="text"
             value={targetName}
