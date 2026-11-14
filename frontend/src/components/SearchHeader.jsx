@@ -9,17 +9,27 @@ const CHALLENGE_PRESETS = [
   { name: "R Draconis", ra: "248.16750", dec: "66.75500", badge: "Mira Giant" },
 ];
 
-export default function SearchHeader({ onSearch, loading = false, initialRa = "269.45208", initialDec = "4.69333", initialName = "Barnard's Star" }) {
+export default function SearchHeader({ 
+  onSearch, 
+  loading = false, 
+  initialRa = "269.45208", 
+  initialDec = "4.69333", 
+  initialName = "Barnard's Star",
+  initialFov = 3.0
+}) {
   const [ra, setRa] = useState(initialRa);
   const [dec, setDec] = useState(initialDec);
-  const [fov, setFov] = useState(3.0);
+  const [fov, setFov] = useState(initialFov);
   const [targetName, setTargetName] = useState(initialName);
 
   React.useEffect(() => {
     setRa(initialRa);
     setDec(initialDec);
     setTargetName(initialName);
-  }, [initialRa, initialDec, initialName]);
+    if (initialFov !== undefined && initialFov !== null) {
+      setFov(parseFloat(initialFov));
+    }
+  }, [initialRa, initialDec, initialName, initialFov]);
 
   const handleSubmit = (e) => {
     e?.preventDefault();

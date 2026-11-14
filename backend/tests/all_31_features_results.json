@@ -61,7 +61,7 @@
   },
   "F16": {
     "status": "PASS",
-    "detail": "Cross-matched multi-wavelength epochs across missions: 2MASS, SPHEREx, WISE (Cryogenic)"
+    "detail": "Cross-matched multi-wavelength epochs across missions: WISE (Cryogenic), 2MASS, SPHEREx"
   },
   "F17": {
     "status": "PASS",
@@ -105,7 +105,7 @@
   },
   "F27": {
     "status": "PASS",
-    "detail": "Processed citizen science classification for cand-001: classification_id=37"
+    "detail": "Processed citizen science classification for cand-001: classification_id=39"
   },
   "F28": {
     "status": "PASS",

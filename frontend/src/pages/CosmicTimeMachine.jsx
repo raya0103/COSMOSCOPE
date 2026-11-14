@@ -16,9 +16,11 @@ export default function CosmicTimeMachine() {
   const initialRa = searchParams.get('ra') || '269.45208';
   const initialDec = searchParams.get('dec') || '4.69333';
   const initialName = searchParams.get('name') || "Barnard's Star";
+  const initialFov = parseFloat(searchParams.get('fov') || '3.0');
 
   const [loading, setLoading] = useState(false);
   const [coords, setCoords] = useState({ ra: initialRa, dec: initialDec, name: initialName });
+  const [fov, setFov] = useState(initialFov);
   
   // Operational Modes: 'spherex' (authentic SPHEREx archive) | 'multimission' (2MASS/WISE/SPHEREx) | 'simulation' (SIMULATED DATA)
   const [activeMode, setActiveMode] = useState('spherex');
@@ -51,8 +53,10 @@ export default function CosmicTimeMachine() {
   const [showAstrometryOverlay, setShowAstrometryOverlay] = useState(true);
 
   // Load observations when mode or coordinates change
-  const loadEpochs = async (params, mode = activeMode) => {
+  const loadEpochs = async (params, mode = activeMode, targetFov = fov) => {
     setLoading(true);
+    const effectiveFov = params.fov_arcmin !== undefined ? parseFloat(params.fov_arcmin) : targetFov;
+    setFov(effectiveFov);
     setCoords({ ra: params.ra, dec: params.dec, name: params.target_name || '' });
     try {
       if (mode === 'multimission') {
@@ -79,20 +83,20 @@ export default function CosmicTimeMachine() {
         setObservations(mappedObs);
         setCurrentIndex(0);
         if (mappedObs.length > 0) {
-          loadFrameForEpoch(mappedObs[0], setFrameDataA, setFrameMetaA, params.ra, params.dec);
+          loadFrameForEpoch(mappedObs[0], setFrameDataA, setFrameMetaA, params.ra, params.dec, effectiveFov);
           if (mappedObs.length > 1) {
-            loadFrameForEpoch(mappedObs[1], setFrameDataB, setFrameMetaB, params.ra, params.dec);
+            loadFrameForEpoch(mappedObs[1], setFrameDataB, setFrameMetaB, params.ra, params.dec, effectiveFov);
           }
         }
       } else {
-        const res = await api.searchObservations(params);
+        const res = await api.searchObservations({ ...params, fov_arcmin: effectiveFov });
         setSearchResponse(res);
         if (res.observations && res.observations.length > 0) {
           setObservations(res.observations);
           setCurrentIndex(0);
-          loadFrameForEpoch(res.observations[0], setFrameDataA, setFrameMetaA, params.ra, params.dec);
+          loadFrameForEpoch(res.observations[0], setFrameDataA, setFrameMetaA, params.ra, params.dec, effectiveFov);
           if (res.observations.length > 1) {
-            loadFrameForEpoch(res.observations[1], setFrameDataB, setFrameMetaB, params.ra, params.dec);
+            loadFrameForEpoch(res.observations[1], setFrameDataB, setFrameMetaB, params.ra, params.dec, effectiveFov);
           }
         } else {
           setObservations([]);
@@ -112,13 +116,13 @@ export default function CosmicTimeMachine() {
     }
   };
 
-  const loadFrameForEpoch = async (obs, setData, setMeta, ra, dec) => {
+  const loadFrameForEpoch = async (obs, setData, setMeta, ra, dec, currentFov = fov) => {
     try {
       const imgRes = await api.getImageDetails(
         obs.obs_id, 
         ra, 
         dec, 
-        3.0, 
+        currentFov, 
         'asinh', 
         'inferno', 
         obs.detector || 1
@@ -130,14 +134,27 @@ export default function CosmicTimeMachine() {
     }
   };
 
+  // Handler for explicit FOV change in Time Machine viewport
+  const handleFovChange = (newFov) => {
+    const parsedFov = parseFloat(newFov);
+    setFov(parsedFov);
+    if (observations.length > 0 && observations[currentIndex]) {
+      loadFrameForEpoch(observations[currentIndex], setFrameDataA, setFrameMetaA, coords.ra, coords.dec, parsedFov);
+      const nextIdx = (currentIndex + 1) % observations.length;
+      if (observations[nextIdx]) {
+        loadFrameForEpoch(observations[nextIdx], setFrameDataB, setFrameMetaB, coords.ra, coords.dec, parsedFov);
+      }
+    }
+  };
+
   // Initial load
   useEffect(() => {
     loadEpochs({
       ra: initialRa,
       dec: initialDec,
-      fov_arcmin: 3.0,
+      fov_arcmin: initialFov,
       target_name: initialName
-    }, activeMode);
+    }, activeMode, initialFov);
   }, [activeMode]);
 
   // Time-lapse playback effect
@@ -146,12 +163,12 @@ export default function CosmicTimeMachine() {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => {
         const next = (prev + 1) % observations.length;
-        loadFrameForEpoch(observations[next], setFrameDataA, setFrameMetaA, coords.ra, coords.dec);
+        loadFrameForEpoch(observations[next], setFrameDataA, setFrameMetaA, coords.ra, coords.dec, fov);
         return next;
       });
     }, 1000 / playbackSpeedFps);
     return () => clearInterval(interval);
-  }, [isPlaying, playbackSpeedFps, observations, isBlinking, coords.ra, coords.dec]);
+  }, [isPlaying, playbackSpeedFps, observations, isBlinking, coords.ra, coords.dec, fov]);
 
   const currentEpoch = observations[currentIndex];
   const canCompare = activeMode === 'multimission' 
@@ -163,11 +180,12 @@ export default function CosmicTimeMachine() {
       
       {/* Header Search */}
       <SearchHeader
-        onSearch={(p) => loadEpochs(p, activeMode)}
+        onSearch={(p) => loadEpochs(p, activeMode, p.fov_arcmin)}
         loading={loading}
         initialRa={coords.ra}
         initialDec={coords.dec}
         initialName={coords.name}
+        initialFov={fov}
       />
 
       {/* Mode Switcher Banner */}
@@ -277,24 +295,43 @@ export default function CosmicTimeMachine() {
         <div className="lg:col-span-7 space-y-4">
           <div className="astro-card p-5 rounded-2xl flex flex-col min-h-[580px]">
             
-            {/* Viewport Status Header */}
-            <div className="flex items-center justify-between pb-3 mb-2 border-b border-space-border/60">
+            {/* Viewport Status Header with FOV Control */}
+            <div className="flex flex-wrap items-center justify-between pb-3 mb-2 border-b border-space-border/60 gap-2">
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-cyan-400" />
                 <h3 className="text-sm font-bold text-white">
                   {isBlinking ? "Blink Comparator Mode" : "Interactive Epoch Viewport"}
                 </h3>
               </div>
-              {currentEpoch && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-cyan-300 font-semibold">
-                    Epoch {currentIndex + 1} of {observations.length}
-                  </span>
-                  <span className="text-[11px] font-mono text-slate-400">
-                    • {currentEpoch.obs_date_iso?.split('T')[0]}
-                  </span>
+              <div className="flex items-center gap-3">
+                {/* Dedicated Working FOV Control */}
+                <div className="flex items-center gap-1.5 bg-space-950 px-2.5 py-1 rounded-xl border border-cyan-500/30">
+                  <Compass className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-[11px] text-slate-400 font-medium">FOV:</span>
+                  <select
+                    value={fov}
+                    onChange={(e) => handleFovChange(e.target.value)}
+                    className="bg-transparent text-cyan-300 font-mono text-xs font-semibold focus:outline-none cursor-pointer"
+                    title="Change Field of View for Epoch Cutouts"
+                  >
+                    <option value="1.0" className="bg-space-950 text-slate-200">1.0′ (Deep Core)</option>
+                    <option value="3.0" className="bg-space-950 text-slate-200">3.0′ (Standard)</option>
+                    <option value="6.0" className="bg-space-950 text-slate-200">6.0′ (Wide Field)</option>
+                    <option value="15.0" className="bg-space-950 text-slate-200">15.0′ (Survey Context)</option>
+                  </select>
                 </div>
-              )}
+
+                {currentEpoch && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono text-cyan-300 font-semibold">
+                      Epoch {currentIndex + 1} of {observations.length}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400">
+                      • {currentEpoch.obs_date_iso?.split('T')[0]}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Canvas */}
@@ -343,7 +380,7 @@ export default function CosmicTimeMachine() {
                   onChange={(e) => {
                     const idx = parseInt(e.target.value);
                     setCurrentIndex(idx);
-                    loadFrameForEpoch(observations[idx], setFrameDataA, setFrameMetaA, coords.ra, coords.dec);
+                    loadFrameForEpoch(observations[idx], setFrameDataA, setFrameMetaA, coords.ra, coords.dec, fov);
                   }}
                   className="w-full accent-cyan-400 bg-space-950 h-2 rounded-lg cursor-pointer"
                 />
@@ -356,7 +393,7 @@ export default function CosmicTimeMachine() {
                     onClick={() => {
                       const prev = Math.max(0, currentIndex - 1);
                       setCurrentIndex(prev);
-                      loadFrameForEpoch(observations[prev], setFrameDataA, setFrameMetaA, coords.ra, coords.dec);
+                      loadFrameForEpoch(observations[prev], setFrameDataA, setFrameMetaA, coords.ra, coords.dec, fov);
                     }}
                     className="p-2 rounded-xl bg-space-850 hover:bg-space-800 text-slate-300 border border-space-border transition-colors"
                     title="Previous Epoch"
@@ -374,7 +411,7 @@ export default function CosmicTimeMachine() {
                     onClick={() => {
                       const next = (currentIndex + 1) % observations.length;
                       setCurrentIndex(next);
-                      loadFrameForEpoch(observations[next], setFrameDataA, setFrameMetaA, coords.ra, coords.dec);
+                      loadFrameForEpoch(observations[next], setFrameDataA, setFrameMetaA, coords.ra, coords.dec, fov);
                     }}
                     className="p-2 rounded-xl bg-space-850 hover:bg-space-800 text-slate-300 border border-space-border transition-colors"
                     title="Next Epoch"
@@ -542,7 +579,7 @@ export default function CosmicTimeMachine() {
                     key={`${obs.obs_id}_D${obs.detector || 1}_${idx}`}
                     onClick={() => {
                       setCurrentIndex(idx);
-                      loadFrameForEpoch(obs, setFrameDataA, setFrameMetaA, coords.ra, coords.dec);
+                      loadFrameForEpoch(obs, setFrameDataA, setFrameMetaA, coords.ra, coords.dec, fov);
                     }}
                     className={`p-2 rounded-xl border text-xs cursor-pointer transition-all ${
                       isCurrent 

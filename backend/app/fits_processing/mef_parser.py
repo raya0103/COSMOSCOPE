@@ -13,11 +13,19 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.wcs import WCS
 from astropy.visualization import AsinhStretch, LogStretch, SqrtStretch, LinearStretch, ZScaleInterval
+from astropy.nddata import Cutout2D
+from astropy.coordinates import SkyCoord
+import astropy.units as u
 
-def parse_mef_file(fits_path: str, target_coord: Optional[Tuple[float, float]] = None) -> Dict[str, Any]:
+def parse_mef_file(
+    fits_path: str, 
+    target_coord: Optional[Tuple[float, float]] = None,
+    fov_arcmin: Optional[float] = None
+) -> Dict[str, Any]:
     """
     Parses a SPHEREx Multi-Extension FITS file, extracting headers, data arrays,
-    statistics, and spectral wavelength mapping.
+    statistics, and spectral wavelength mapping. Optionally extracts an angular
+    sub-cutout centered on target_coord if fov_arcmin is specified.
     """
     result = {
         "is_valid": False,
@@ -52,6 +60,33 @@ def parse_mef_file(fits_path: str, target_coord: Optional[Tuple[float, float]] =
             img_data = img_hdu.data
             img_hdr = img_hdu.header
             
+        # Optional angular cutout extraction via Astropy Cutout2D
+        active_wcs = None
+        try:
+            spatial_wcs = WCS(img_hdr)
+            active_wcs = spatial_wcs
+            if fov_arcmin is not None and fov_arcmin > 0:
+                fov_val = float(fov_arcmin)
+                # Determine center coordinate: target_coord if provided, else image WCS center
+                if target_coord and len(target_coord) >= 2:
+                    center_sky = SkyCoord(ra=float(target_coord[0]) * u.deg, dec=float(target_coord[1]) * u.deg)
+                else:
+                    mid_y, mid_x = img_data.shape[0] / 2.0, img_data.shape[1] / 2.0
+                    center_sky = spatial_wcs.pixel_to_world(mid_x, mid_y)
+                
+                cutout_obj = Cutout2D(
+                    img_data,
+                    position=center_sky,
+                    size=(fov_val * u.arcmin, fov_val * u.arcmin),
+                    wcs=spatial_wcs,
+                    mode='partial',
+                    fill_value=0.0
+                )
+                img_data = cutout_obj.data
+                active_wcs = cutout_obj.wcs
+        except Exception:
+            pass
+
         result["image_header"] = {k: str(img_hdr[k]) for k in img_hdr.keys() if len(k) <= 8}
         result["shape"] = list(img_data.shape)
         result["bunit"] = img_hdr.get("BUNIT", "MJy / sr")
@@ -82,8 +117,8 @@ def parse_mef_file(fits_path: str, target_coord: Optional[Tuple[float, float]] =
             
             # If target_coord provided, find wavelength at target; otherwise center of image
             if target_coord:
-                spatial_wcs = WCS(img_hdr)
-                px, py = spatial_wcs.world_to_pixel_values(target_coord[0], target_coord[1])
+                wcs_for_wave = active_wcs or WCS(img_hdr)
+                px, py = wcs_for_wave.world_to_pixel_values(target_coord[0], target_coord[1])
             else:
                 px = img_data.shape[1] / 2.0
                 py = img_data.shape[0] / 2.0

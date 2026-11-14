@@ -299,7 +299,7 @@ def get_image_details(
     if not fits_path:
         raise HTTPException(status_code=502, detail="Failed to retrieve FITS cutout from NASA/IPAC IRSA.")
         
-    parsed = parse_mef_file(fits_path, target_coord=(ra, dec))
+    parsed = parse_mef_file(fits_path, target_coord=(ra, dec), fov_arcmin=eff_fov)
     
     raw_array = np.array(parsed["raw_image_data"])
     thumb_b64 = generate_stretched_thumbnail_base64(raw_array, stretch=eff_stretch, colormap=eff_colormap)

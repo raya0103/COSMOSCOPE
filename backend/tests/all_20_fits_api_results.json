@@ -115,14 +115,14 @@
     "detector": "D3",
     "date_obs": "2025-08-16T03:19:14.791",
     "shape": [
-      16,
+      29,
       29
     ],
     "bunit": "MJy / sr",
     "md5": "a15316a8",
-    "peak_snr": 741.7,
-    "centroid": "(16.057, 6.025)",
-    "png_bytes": 2873,
+    "peak_snr": 108.6,
+    "centroid": "(16.056, 6.023)",
+    "png_bytes": 3000,
     "status": "PASS"
   },
   {
