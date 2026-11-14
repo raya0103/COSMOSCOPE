@@ -14,10 +14,10 @@ from app.api.routes import (
     get_health,
     get_featured_targets,
     get_candidates,
+    get_candidate_detail,
     search_observations,
     rank_candidate_anomaly,
     crossmatch_catalogues,
-    submit_classification,
     _handle_passport_export,
     extract_spectrum,
     get_multimission_view,
@@ -29,8 +29,7 @@ from app.api.routes import (
 )
 from app.models.schemas import (
     CoordinateInput,
-    ImageOperationRequest,
-    CitizenClassificationSubmission
+    ImageOperationRequest
 )
 from app.fits_processing.mef_parser import parse_mef_file, generate_stretched_thumbnail_base64
 from app.data_access.irsa_client import search_spherex_observations
@@ -292,21 +291,13 @@ def run_all_31():
     results["F26"] = f"PASS: Generated {len(pdf_res.body)} bytes PDF report"
     print(f" -> {results['F26']}")
 
-    # F27: Citizen Science Classification Portal
-    print("[F27] Testing Citizen Science Classification Portal...")
-    sub_payload = CitizenClassificationSubmission(
-        candidate_id=cand_id,
-        user_identifier="SpaceAppsReviewer",
-        is_real_motion=True,
-        motion_direction="North-West",
-        is_variable_brightness=False,
-        is_image_artifact=False,
-        confidence_rating=5,
-        notes="High amplitude periodic infrared pulsation verified."
-    )
-    class_res = submit_classification(cand_id, sub_payload)
-    assert class_res["success"] is True
-    results["F27"] = f"PASS: Submitted classification ID={class_res.get('classification_id')}"
+    # F27: Scientific Evidence Dossier Candidate Ledger
+    print("[F27] Testing Scientific Evidence Dossier Candidate Ledger...")
+    cand_res = get_candidate_detail(cand_id)
+    assert cand_res is not None
+    assert cand_res["candidate_id"] == cand_id
+    assert "anomaly_score" in cand_res
+    results["F27"] = f"PASS: Retrieved candidate anomaly ledger for {cand_id}: score={cand_res['anomaly_score']}"
     print(f" -> {results['F27']}")
 
     # F28: Offline Resilient Fallback Cache

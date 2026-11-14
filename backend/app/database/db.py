@@ -224,13 +224,37 @@ def get_candidate_classifications(candidate_id: str) -> Dict[str, Any]:
             "classifications": [dict(r) for r in rows[-15:]]
         }
 
+def get_candidate_by_id(candidate_id: str) -> Optional[Dict[str, Any]]:
+    """Retrieves candidate anomaly record by candidate_id."""
+    ensure_db()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM candidates WHERE candidate_id = ?", (candidate_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+        res = dict(row)
+        import json
+        try:
+            res["reasons"] = json.loads(res.get("reasons_json", "[]"))
+        except Exception:
+            res["reasons"] = []
+        return res
+
 def list_candidates(limit: int = 20) -> List[Dict[str, Any]]:
-    """Returns candidate review queue ordered by anomaly score."""
+    """Returns candidate anomaly review queue ordered by anomaly score."""
     ensure_db()
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM candidates ORDER BY anomaly_score DESC LIMIT ?", (limit,))
-        return [dict(r) for r in cursor.fetchall()]
+        rows = [dict(r) for r in cursor.fetchall()]
+        import json
+        for r in rows:
+            try:
+                r["reasons"] = json.loads(r.get("reasons_json", "[]"))
+            except Exception:
+                r["reasons"] = []
+        return rows
 
 # Auto-ensure on import
 ensure_db()

@@ -16,8 +16,7 @@ from app.models.schemas import (
     ObservationRecord,
     MultiMissionEpoch,
     MultiMissionResponse,
-    ImageOperationRequest,
-    CitizenClassificationSubmission
+    ImageOperationRequest
 )
 from app.fits_processing.coordinates import parse_and_validate_coordinates, resolve_target_name
 from app.data_access.irsa_client import (
@@ -37,8 +36,8 @@ from app.detection.anomaly_intelligence import compute_anomaly_index
 from app.reports.evidence_passport import generate_evidence_passport_data, generate_passport_pdf
 from app.database.db import (
     list_candidates,
-    get_candidate_classifications,
-    submit_citizen_classification
+    get_candidate_by_id,
+    get_candidate_classifications
 )
 
 router = APIRouter(prefix="/api", tags=["COSMOSCOPE"])
@@ -334,7 +333,12 @@ def get_image_details(
         cx, cy = float(peak_x), float(peak_y)
 
     # Measure aperture photometry centered on refined source centroid
-    photometry = measure_aperture_photometry(raw_array, center_xy=(cx, cy))
+    photometry = measure_aperture_photometry(
+        raw_array,
+        center_xy=(cx, cy),
+        valid_mask=parsed.get("valid_pixel_mask"),
+        pixel_scale_arcsec=parsed.get("pixel_scale_arcsec", 6.2)
+    )
 
     # Formal Poisson photon-noise centroid uncertainty: sigma = FWHM / (2.355 * SNR) (King 1983)
     snr = max(1.0, (peak_val - med) / sigma_bg)
@@ -391,6 +395,10 @@ def get_image_details(
         "irsa_source_url": cutout_url,
         "obs_collection": matched_obs.get("obs_collection", "spherex_qr2"),
         "data_provenance": "NASA/IPAC Infrared Science Archive (IRSA) — SPHEREx Quick Release 2 (QR2)",
+        "provenance_tier": "MEASURED",
+        "coverage_status": parsed.get("coverage_status", "COMPLETE_ARCHIVE_COVERAGE"),
+        "valid_pixel_fraction": parsed.get("valid_pixel_fraction", 1.0),
+        "requested_fov_arcmin": eff_fov,
         "measured_centroid_px": {"x": round(float(cx), 3), "y": round(float(cy), 3)},
         "centroid_uncertainty_px": round(float(sigma_centroid_px), 4),
         "centroid_uncertainty_arcsec": round(float(sigma_centroid_arcsec), 4),
@@ -400,7 +408,7 @@ def get_image_details(
         "peak_snr": round(float(snr), 1),
         "gaia_predicted_px": {"x": round(float(pred_x_px), 2), "y": round(float(pred_y_px), 2)},
         "gaia_predicted_coords": {"ra": round(float(gaia_pred_ra), 6), "dec": round(float(gaia_pred_dec), 6)},
-        "pixel_scale_arcsec": 6.2
+        "pixel_scale_arcsec": parsed.get("pixel_scale_arcsec", 6.2)
     }
 
 @router.get("/time-machine/multimission", response_model=MultiMissionResponse)
@@ -665,8 +673,8 @@ def subtract_images(req: ImageOperationRequest):
     if not p1 or not p2:
         raise HTTPException(status_code=502, detail="Failed to retrieve one of the FITS cutouts from IRSA.")
         
-    parsed1 = parse_mef_file(p1)
-    parsed2 = parse_mef_file(p2)
+    parsed1 = parse_mef_file(p1, target_coord=(req.ra, req.dec), fov_arcmin=req.fov_arcmin)
+    parsed2 = parse_mef_file(p2, target_coord=(req.ra, req.dec), fov_arcmin=req.fov_arcmin)
     data1 = parsed1["raw_image_data"]
     data2 = parsed2["raw_image_data"]
     
@@ -675,7 +683,9 @@ def subtract_images(req: ImageOperationRequest):
         np.array(data2),
         normalize=req.normalize,
         meta1=parsed1,
-        meta2=parsed2
+        meta2=parsed2,
+        mask1=parsed1.get("valid_pixel_mask"),
+        mask2=parsed2.get("valid_pixel_mask")
     )
     diff_arr = np.array(sub_res["difference_data"])
     thumb = generate_stretched_thumbnail_base64(diff_arr, stretch=req.stretch, colormap=req.color_map)
@@ -701,7 +711,7 @@ def stack_observation_images(req: ImageOperationRequest):
         c_url = build_cutout_url(url, req.ra, req.dec, req.fov_arcmin)
         p, _ = get_cached_fits(c_url, obs_id=oid, ra=req.ra, dec=req.dec)
         if p:
-            parsed = parse_mef_file(p)
+            parsed = parse_mef_file(p, target_coord=(req.ra, req.dec), fov_arcmin=req.fov_arcmin)
             arrays.append(np.array(parsed["raw_image_data"]))
             metadata_list.append(parsed)
                 
@@ -732,7 +742,11 @@ def extract_spectrum(query: CoordinateInput):
         if p:
             parsed = parse_mef_file(p, target_coord=(ra_deg, dec_deg))
             import numpy as np
-            phot = measure_aperture_photometry(np.array(parsed["raw_image_data"]))
+            phot = measure_aperture_photometry(
+                np.array(parsed["raw_image_data"]),
+                valid_mask=parsed.get("valid_pixel_mask"),
+                pixel_scale_arcsec=parsed.get("pixel_scale_arcsec", 6.2)
+            )
             obs_photometry.append({
                 "detector": parsed["detector"],
                 "central_wavelength_um": parsed["central_wavelength_um"],
@@ -867,16 +881,11 @@ def get_candidates():
 
 @router.get("/candidates/{candidate_id}")
 def get_candidate_detail(candidate_id: str):
-    """Returns classification statistics and citizen votes for a candidate."""
-    return get_candidate_classifications(candidate_id)
-
-@router.post("/candidates/{candidate_id}/classifications")
-def submit_classification(candidate_id: str, submission: CitizenClassificationSubmission):
-    """Innovation 3: Submits a citizen science review."""
-    submission_data = submission.model_dump() if hasattr(submission, "model_dump") else submission.dict()
-    submission_data["candidate_id"] = candidate_id
-    new_id = submit_citizen_classification(submission_data)
-    return {"success": True, "classification_id": new_id, "message": "Citizen review submitted successfully."}
+    """Returns candidate anomaly evaluation and scientific ledger."""
+    cand = get_candidate_by_id(candidate_id)
+    if not cand:
+        raise HTTPException(status_code=404, detail=f"Candidate anomaly {candidate_id} not found.")
+    return cand
 
 def _handle_passport_export(input_ra, input_dec, input_name, input_fov, format_type):
     try:
@@ -906,7 +915,7 @@ def _handle_passport_export(input_ra, input_dec, input_name, input_fov, format_t
     
     anomaly = compute_anomaly_index(motion_metrics, var_metrics, spec_metrics, cat_metrics)
     
-    passport_data = generate_evidence_passport_data(
+    dossier_data = generate_evidence_passport_data(
         target_info=target_info,
         observations=raw_obs,
         motion_data=motion_metrics,
@@ -918,18 +927,35 @@ def _handle_passport_export(input_ra, input_dec, input_name, input_fov, format_t
     )
     
     if format_type.lower() == "json":
-        return passport_data
+        return dossier_data
         
-    pdf_bytes = generate_passport_pdf(passport_data)
+    pdf_bytes = generate_passport_pdf(dossier_data)
+    cand_id = dossier_data.get('candidate_id', 'TARGET')
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=SPHEREx_Passport_{passport_data['candidate_id']}.pdf"}
+        headers={"Content-Disposition": f"attachment; filename=SPHEREx_Scientific_Evidence_Dossier_{cand_id}.pdf"}
     )
 
+@router.post("/dossier/export")
+def export_evidence_dossier_post(query: CoordinateInput, format: str = Query(default="pdf")):
+    """Innovation 2 & Feature 6: Generates reproducible Scientific Evidence Dossier via POST."""
+    return _handle_passport_export(query.ra, query.dec, query.target_name, query.fov_arcmin, format)
+
+@router.get("/dossier/export")
+def export_evidence_dossier_get(
+    format: str = Query(default="pdf"),
+    ra: Union[float, str] = Query(default=269.45208),
+    dec: Union[float, str] = Query(default=4.69333),
+    target_name: Optional[str] = Query(default=None),
+    fov_arcmin: float = Query(default=3.0)
+):
+    """Innovation 2 & Feature 6: Generates reproducible Scientific Evidence Dossier via GET for browser download."""
+    return _handle_passport_export(ra, dec, target_name, fov_arcmin, format)
+
+# Backward-compatibility routes for existing links
 @router.post("/reports/export")
 def export_evidence_passport_post(query: CoordinateInput, format: str = Query(default="pdf")):
-    """Innovation 2 & Feature 6: Generates reproducible Discovery Evidence Passport via POST."""
     return _handle_passport_export(query.ra, query.dec, query.target_name, query.fov_arcmin, format)
 
 @router.get("/reports/export")
@@ -940,7 +966,6 @@ def export_evidence_passport_get(
     target_name: Optional[str] = Query(default=None),
     fov_arcmin: float = Query(default=3.0)
 ):
-    """Innovation 2 & Feature 6: Generates reproducible Discovery Evidence Passport via GET for browser download."""
     return _handle_passport_export(ra, dec, target_name, fov_arcmin, format)
 
 # ---------------------------------------------------------------------------

@@ -17,6 +17,8 @@ export default function ImageAnalysisLab() {
   const [obsId2, setObsId2] = useState('');
   const [coords, setCoords] = useState({ ra: initialRa, dec: initialDec, name: initialName });
   
+  const [fov, setFov] = useState(3.0);
+  
   // Image Data
   const [data1, setData1] = useState(null);
   const [data2, setData2] = useState(null);
@@ -27,15 +29,17 @@ export default function ImageAnalysisLab() {
 
   const loadObservations = async (params) => {
     setLoading(true);
+    const effFov = params.fov_arcmin !== undefined ? params.fov_arcmin : fov;
+    setFov(effFov);
     setCoords({ ra: params.ra, dec: params.dec, name: params.target_name || '' });
     try {
-      const res = await api.searchObservations(params);
+      const res = await api.searchObservations({ ...params, fov_arcmin: effFov });
       if (res.observations && res.observations.length >= 2) {
         setObservations(res.observations);
         setObsId1(res.observations[0].obs_id);
         setObsId2(res.observations[1].obs_id);
-        loadSingleFrame(res.observations[0].obs_id, params.ra, params.dec, setData1);
-        loadSingleFrame(res.observations[1].obs_id, params.ra, params.dec, setData2);
+        loadSingleFrame(res.observations[0].obs_id, params.ra, params.dec, effFov, setData1);
+        loadSingleFrame(res.observations[1].obs_id, params.ra, params.dec, effFov, setData2);
       }
     } catch (err) {
       console.error(err);
@@ -44,9 +48,9 @@ export default function ImageAnalysisLab() {
     }
   };
 
-  const loadSingleFrame = async (obsId, ra, dec, setter) => {
+  const loadSingleFrame = async (obsId, ra, dec, effFov, setter) => {
     try {
-      const imgRes = await api.getImageDetails(obsId, ra, dec, 3.0);
+      const imgRes = await api.getImageDetails(obsId, ra, dec, effFov);
       setter(imgRes.raw_grid);
     } catch (err) {
       console.error(err);
@@ -57,9 +61,16 @@ export default function ImageAnalysisLab() {
     loadObservations({
       ra: initialRa,
       dec: initialDec,
-      target_name: initialName
+      target_name: initialName,
+      fov_arcmin: fov
     });
   }, []);
+
+  const handleFovChange = (newFov) => {
+    setFov(newFov);
+    if (obsId1) loadSingleFrame(obsId1, coords.ra, coords.dec, newFov, setData1);
+    if (obsId2) loadSingleFrame(obsId2, coords.ra, coords.dec, newFov, setData2);
+  };
 
   const runOperation = async () => {
     if (!obsId1 || !obsId2) return;
@@ -71,7 +82,7 @@ export default function ImageAnalysisLab() {
           obs_id_2: obsId2,
           ra: parseFloat(coords.ra),
           dec: parseFloat(coords.dec),
-          fov_arcmin: 3.0,
+          fov_arcmin: fov,
           normalize: true
         });
         setResultData(res.difference_data);
@@ -81,7 +92,7 @@ export default function ImageAnalysisLab() {
           obs_ids: [obsId1, obsId2],
           ra: parseFloat(coords.ra),
           dec: parseFloat(coords.dec),
-          fov_arcmin: 3.0
+          fov_arcmin: fov
         });
         setResultData(res.stacked_data);
         setMetrics(res);
@@ -103,12 +114,13 @@ export default function ImageAnalysisLab() {
         initialRa={initialRa}
         initialDec={initialDec}
         initialName={initialName}
+        initialFov={fov}
       />
 
       {/* Control Banner */}
       <div className="astro-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
         
-        {/* Epoch Selectors */}
+        {/* Epoch Selectors & FOV */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-slate-300">Reference (Epoch 1):</span>
@@ -116,7 +128,7 @@ export default function ImageAnalysisLab() {
               value={obsId1}
               onChange={(e) => {
                 setObsId1(e.target.value);
-                loadSingleFrame(e.target.value, coords.ra, coords.dec, setData1);
+                loadSingleFrame(e.target.value, coords.ra, coords.dec, fov, setData1);
               }}
               className="px-3 py-1.5 rounded-xl bg-space-950 border border-space-border text-xs text-cyan-300 font-mono"
             >
@@ -134,7 +146,7 @@ export default function ImageAnalysisLab() {
               value={obsId2}
               onChange={(e) => {
                 setObsId2(e.target.value);
-                loadSingleFrame(e.target.value, coords.ra, coords.dec, setData2);
+                loadSingleFrame(e.target.value, coords.ra, coords.dec, fov, setData2);
               }}
               className="px-3 py-1.5 rounded-xl bg-space-950 border border-space-border text-xs text-sky-300 font-mono"
             >
@@ -143,6 +155,20 @@ export default function ImageAnalysisLab() {
                   {o.obs_id} ({o.energy_bandpassname}) • {o.obs_date_iso.split('T')[0]}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-space-950 border border-space-border text-xs">
+            <span className="font-semibold text-slate-400 font-mono text-[11px]">FOV:</span>
+            <select
+              value={fov}
+              onChange={(e) => handleFovChange(parseFloat(e.target.value))}
+              className="bg-transparent text-xs font-mono text-cyan-300 font-semibold focus:outline-none cursor-pointer"
+            >
+              <option value={1.0} className="bg-space-950 text-white">1.0′</option>
+              <option value={3.0} className="bg-space-950 text-white">3.0′</option>
+              <option value={6.0} className="bg-space-950 text-white">6.0′</option>
+              <option value={15.0} className="bg-space-950 text-white">15.0′</option>
             </select>
           </div>
         </div>
@@ -230,15 +256,34 @@ export default function ImageAnalysisLab() {
       {/* Quantitative Scientific Metrics Banner */}
       {metrics && (
         <div className="astro-card p-5 rounded-2xl border-l-4 border-l-cyan-400 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
               <span>Scientific Processing Findings</span>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 font-mono">
+                [CALCULATED]
+              </span>
             </h3>
-            <span className="text-xs font-mono text-cyan-300">
-              Noise floor: {metrics.sigma_noise?.toFixed(4) || metrics.stacked_noise?.toFixed(4)} MJy/sr
-            </span>
+            <div className="flex items-center gap-3 text-xs font-mono">
+              {metrics.valid_fraction !== undefined && (
+                <span className="text-emerald-400">
+                  Valid Area: {(metrics.valid_fraction * 100).toFixed(0)}% ({metrics.valid_pixel_count} px)
+                </span>
+              )}
+              <span className="text-cyan-300">
+                Noise floor: {metrics.sigma_noise?.toFixed(4) || metrics.stacked_noise?.toFixed(4)} MJy/sr
+              </span>
+            </div>
           </div>
+
+          {metrics.compatibility_status && metrics.compatibility_status !== 'COMPATIBLE' && (
+            <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/40 text-amber-300 text-xs font-mono space-y-1">
+              <div className="font-bold flex items-center gap-1.5">
+                <span>⚠️ {metrics.compatibility_status}</span>
+              </div>
+              <p className="text-[11px] text-slate-300 leading-relaxed font-sans">{metrics.compatibility_notes}</p>
+            </div>
+          )}
 
           <p className="text-xs text-slate-300 leading-relaxed font-mono">
             {metrics.explanation}

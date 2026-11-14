@@ -189,7 +189,7 @@ export default function Home() {
   const faqs = [
     {
       q: "What is COSMOSCOPE?",
-      a: "COSMOSCOPE is an interactive astronomical research platform connecting directly to NASA/IPAC IRSA archives to enable researchers and citizen scientists to explore genuine multi-epoch SPHEREx observations, analyze 102 infrared spectral bands, track astrometric motion vectors, and evaluate candidate anomalies with verifiable scientific provenance."
+      a: "COSMOSCOPE is an interactive astronomical research platform connecting directly to NASA/IPAC IRSA archives to enable researchers, educators, and science enthusiasts to explore genuine multi-epoch SPHEREx observations, analyze 102 infrared spectral bands, track astrometric motion vectors, and evaluate candidate anomalies with verifiable scientific provenance."
     },
     {
       q: "What is the SPHEREx mission?",
@@ -548,7 +548,7 @@ export default function Home() {
               </p>
 
               <p className="text-sm text-slate-300 leading-relaxed font-light">
-                COSMOSCOPE bridges the gap between raw Multi-Extension FITS terabytes and accessible astrophysical insight. By combining Table Access Protocol (TAP) streaming, interactive multi-epoch blinking, circular aperture photometry, and continuous 102-band spectrophotometric extraction, the platform enables both professional researchers and citizen scientists to explore the dynamic infrared cosmos.
+                COSMOSCOPE bridges the gap between raw Multi-Extension FITS terabytes and accessible astrophysical insight. By combining Table Access Protocol (TAP) streaming, interactive multi-epoch blinking, circular aperture photometry, and continuous 102-band spectrophotometric extraction, the platform enables researchers, students, and astronomers to explore the dynamic infrared cosmos.
               </p>
 
               {/* Scientific Distinction Callouts */}
@@ -686,7 +686,7 @@ export default function Home() {
               </p>
             </div>
             <div className="pt-3 text-xs font-mono font-semibold text-emerald-700 dark:text-emerald-300 border-t border-slate-200 dark:border-white/10">
-              Tools: Discovery Engine · Anomaly Analysis · Evidence Passports
+              Tools: Discovery Engine · Anomaly Analysis · Scientific Evidence Dossiers
             </div>
           </div>
 
@@ -844,7 +844,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-3 pt-3 border-t border-white/5 text-xs text-slate-400">
                   <span className="text-emerald-400 font-mono">Capabilities:</span>
-                  <span>4-Pillar Radar • Candidate Review Queue • Citizen Science</span>
+                  <span>4-Pillar Radar • Candidate Review Queue • Scientific Evidence Dossiers</span>
                 </div>
               </div>
             </div>
@@ -1251,7 +1251,7 @@ export default function Home() {
                 <li><Link to="/image-lab" className="hover:text-cyan-400 transition-colors">Image Analysis Lab</Link></li>
                 <li><Link to="/discovery" className="hover:text-cyan-400 transition-colors">Discovery Engine</Link></li>
                 <li><Link to="/analytics" className="hover:text-cyan-400 transition-colors">Scientific Analytics</Link></li>
-                <li><Link to="/passport" className="hover:text-cyan-400 transition-colors">Evidence Passport</Link></li>
+                <li><Link to="/dossier" className="hover:text-cyan-400 transition-colors">Scientific Evidence Dossier</Link></li>
               </ul>
             </div>
 

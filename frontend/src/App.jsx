@@ -10,8 +10,7 @@ import ImageAnalysisLab from './pages/ImageAnalysisLab';
 import DiscoveryEngine from './pages/DiscoveryEngine';
 import MultiMissionExplorer from './pages/MultiMissionExplorer';
 import ResearchLibrary from './pages/ResearchLibrary';
-import EvidencePassport from './pages/EvidencePassport';
-import CitizenScience from './pages/CitizenScience';
+import ScientificEvidenceDossier from './pages/ScientificEvidenceDossier';
 import ScientificAnalytics from './pages/ScientificAnalytics';
 
 function AppLayout() {
@@ -35,8 +34,8 @@ function AppLayout() {
           <Route path="/analytics" element={<ScientificAnalytics />} />
           <Route path="/multi-mission" element={<MultiMissionExplorer />} />
           <Route path="/research" element={<ResearchLibrary />} />
-          <Route path="/passport" element={<EvidencePassport />} />
-          <Route path="/citizen" element={<CitizenScience />} />
+          <Route path="/dossier" element={<ScientificEvidenceDossier />} />
+          <Route path="/passport" element={<ScientificEvidenceDossier />} />
         </Routes>
       </main>
 

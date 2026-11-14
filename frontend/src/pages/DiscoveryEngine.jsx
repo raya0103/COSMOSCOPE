@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Sparkles, ShieldAlert, Award, FileCheck2, Users, ArrowRight, Activity, Clock, BarChart3 } from 'lucide-react';
+import { Sparkles, ShieldAlert, Award, FileCheck2, ArrowRight, Activity, Clock, BarChart3 } from 'lucide-react';
 import SearchHeader from '../components/SearchHeader';
 import PlotlyChart from '../components/PlotlyChart';
 import { api } from '../services/api';
@@ -200,22 +200,15 @@ export default function DiscoveryEngine() {
             {/* Action Bar */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-space-border/60">
               <div className="text-xs text-slate-400">
-                <b>Recommendation:</b> {anomalyData?.recommended_action || "Standard celestial source."}
+                <b>Astrophysical Assessment:</b> {anomalyData?.recommended_action || "Standard celestial baseline."}
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => navigate(`/passport?ra=${currentTarget.ra}&dec=${currentTarget.dec}&name=${encodeURIComponent(currentTarget.name)}`)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/50 text-violet-300 text-xs font-semibold"
+                  onClick={() => navigate(`/dossier?ra=${currentTarget.ra}&dec=${currentTarget.dec}&name=${encodeURIComponent(currentTarget.name)}`)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/50 text-violet-200 text-xs font-semibold shadow-sm transition-all"
                 >
-                  <FileCheck2 className="w-3.5 h-3.5" />
-                  <span>Evidence Passport</span>
-                </button>
-                <button
-                  onClick={() => navigate(`/citizen?candidate_id=SPX-CAND-269452+004693`)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/50 text-emerald-300 text-xs font-semibold"
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  <span>Citizen Review</span>
+                  <FileCheck2 className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Scientific Evidence Dossier</span>
                 </button>
               </div>
             </div>

@@ -293,24 +293,14 @@ def test_all_features():
     results["F26"] = {"status": "PASS", "detail": f"Export pipeline formats calibrated CSV spectrophotometry table ({len(csv_rows)} rows), JSON metadata, and Evidence Passport PDF"}
     print(f" -> PASS: {results['F26']['detail']}")
 
-    # F27: Citizen Science Classification Portal
-    print("\n[Testing F27] Citizen Science Classification Portal...")
-    # Submit a citizen classification
-    sub_data = {
-        "candidate_id": "cand-001",
-        "user_identifier": "test_citizen_verifier",
-        "is_real_motion": True,
-        "motion_direction": "North-West",
-        "is_variable_brightness": False,
-        "is_image_artifact": False,
-        "confidence_rating": 4,
-        "notes": "Verified apparent motion between V1 and V2 in SPHEREx D3"
-    }
-    res = requests.post(f"{BASE_URL}/candidates/cand-001/classifications", json=sub_data)
+    # F27: Scientific Evidence Dossier Endpoint
+    print("\n[Testing F27] Scientific Evidence Dossier Endpoint...")
+    res = requests.get(f"{BASE_URL}/dossier/export?ra={t_barnard['ra']}&dec={t_barnard['dec']}&format=json")
     assert res.status_code == 200
-    data_f27 = res.json()
-    assert data_f27.get("success") is True
-    results["F27"] = {"status": "PASS", "detail": f"Processed citizen science classification for cand-001: classification_id={data_f27.get('classification_id')}"}
+    dossier_json = res.json()
+    assert "dossier_seal" in dossier_json
+    assert "provenance_tiers" in dossier_json
+    results["F27"] = {"status": "PASS", "detail": f"Generated verified Scientific Evidence Dossier JSON: seal={dossier_json.get('dossier_seal')}"}
     print(f" -> PASS: {results['F27']['detail']}")
 
     # F28: Offline Resilient Fallback Cache

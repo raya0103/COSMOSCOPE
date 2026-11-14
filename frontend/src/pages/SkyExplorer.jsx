@@ -170,14 +170,14 @@ export default function SkyExplorer() {
             <span>6. Multi-Mission (Gaia/WISE)</span>
           </button>
 
-          {/* Export Passport */}
+          {/* Export Dossier */}
           <button
-            onClick={() => navigate(`/passport?ra=${currentRa}&dec=${currentDec}&name=${encodeURIComponent(currentName)}`)}
+            onClick={() => navigate(`/dossier?ra=${currentRa}&dec=${currentDec}&name=${encodeURIComponent(currentName)}`)}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 text-[11px] font-bold shadow-sm transition-all"
-            title="Export Cryptographic Evidence Passport"
+            title="Generate Scientific Evidence Dossier"
           >
             <FileCheck2 className="w-3.5 h-3.5" />
-            <span>Evidence Passport</span>
+            <span>Scientific Evidence Dossier</span>
           </button>
         </div>
       </div>

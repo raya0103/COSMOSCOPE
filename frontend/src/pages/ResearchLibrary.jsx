@@ -190,11 +190,11 @@ export default function ResearchLibrary() {
               <span>Spectral Lab</span>
             </button>
             <button
-              onClick={() => navigate(`/passport?ra=${activeTarget.ra_deg}&dec=${activeTarget.dec_deg}&name=${encodeURIComponent(activeTarget.name)}`)}
+              onClick={() => navigate(`/dossier?ra=${activeTarget.ra_deg}&dec=${activeTarget.dec_deg}&name=${encodeURIComponent(activeTarget.name)}`)}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 text-white text-xs font-semibold shadow-md"
             >
               <FileCheck2 className="w-3.5 h-3.5" />
-              <span>Evidence Passport</span>
+              <span>Evidence Dossier</span>
             </button>
           </div>
         </div>

@@ -215,14 +215,14 @@ export default function SpectralLab() {
                     <td className="py-2 px-3 text-slate-300">{c.flux_density_mjy_sr.toFixed(4)} MJy/sr</td>
                     <td className="py-2 px-3">
                       {c.is_direct_observation ? (
-                        <span className="inline-flex items-center gap-1 text-emerald-400 text-[10px] font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                          Measured Detector Band
+                        <span className="inline-flex items-center gap-1.5 text-cyan-300 text-[10px] font-bold bg-cyan-500/15 px-2 py-0.5 rounded border border-cyan-500/40">
+                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                          [MEASURED] Level 2 FITS
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-slate-400 text-[10px] bg-space-950 px-2 py-0.5 rounded border border-space-border">
-                          <span className="w-1.5 h-1.5 rounded-full border border-slate-400" />
-                          Continuum Model Interpolation
+                        <span className="inline-flex items-center gap-1.5 text-amber-300 text-[10px] font-medium bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          [MODELLED] Continuum
                         </span>
                       )}
                     </td>

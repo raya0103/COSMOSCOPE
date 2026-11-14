@@ -111,8 +111,9 @@ def compute_anomaly_index(
         },
         "interpretable_reasons": reasons,
         "quality_confidence": quality_confidence,
+        "provenance_tier": "CALCULATED",
         "recommended_action": (
-            "Review in Citizen Science Network and generate Discovery Evidence Passport." 
-            if total_score >= 45.0 else "Cataloged for baseline celestial monitoring."
+            "Flagged for multi-epoch verification and compilation into Scientific Evidence Dossier." 
+            if total_score >= 45.0 else "Catalogued for baseline celestial monitoring."
         )
     }

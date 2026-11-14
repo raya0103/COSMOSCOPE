@@ -83,14 +83,17 @@ export const api = {
   
   getCandidateDetails: (id) => fetchJson(`/candidates/${encodeURIComponent(id)}`),
   
-  submitClassification: (id, data) =>
-    fetchJson(`/candidates/${encodeURIComponent(id)}/classifications`, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    
+  exportDossierPdfUrl: (ra, dec, targetName = '', fov = 3.0) =>
+    `${BASE_URL}/dossier/export?format=pdf&ra=${ra}&dec=${dec}&target_name=${encodeURIComponent(targetName)}&fov_arcmin=${fov}`,
+
   exportPassportPdfUrl: (ra, dec, targetName = '') =>
-    `${BASE_URL}/reports/export?format=pdf&ra=${ra}&dec=${dec}&target_name=${encodeURIComponent(targetName)}`,
+    `${BASE_URL}/dossier/export?format=pdf&ra=${ra}&dec=${dec}&target_name=${encodeURIComponent(targetName)}`,
+
+  exportDossierData: (params) =>
+    fetchJson('/dossier/export?format=json', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }),
 
   // Scientific Analytics & Plotly Visualization Endpoints
   getLightCurve: (params) =>

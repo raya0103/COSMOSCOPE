@@ -123,6 +123,7 @@ def get_target_light_curve(ra: float, dec: float, target_name: Optional[str] = N
         "variability_amplitude_percent": var_amplitude_pct,
         "classification": variability_type,
         "units": "MegaJanskys per steradian (MJy/sr)",
+        "provenance_tier": "SIMULATED / MODELLED / INTERPOLATED",
         "provenance": "Theoretical Astrophysical Model Baseline (Parameterized Multi-Epoch Light Curve MJD 60750–61300)",
         "data_type": "theoretical_model_baseline",
         "is_simulated_baseline": True,
@@ -231,6 +232,7 @@ def get_target_motion_trajectory(ra: float, dec: float, target_name: Optional[st
         "total_displacement_arcsec": total_disp_arcsec,
         "epochs": epochs_data,
         "gaia_dr3_verified": True,
+        "provenance_tier": "CALCULATED",
         "provenance": "Gaia DR3 Astrometric Solution cross-matched with SPHEREx Level 2 MEF Centroids"
     }
 

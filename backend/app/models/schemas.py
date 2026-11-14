@@ -160,23 +160,3 @@ class ImageOperationRequest(BaseModel):
     normalize: bool = True
     color_map: str = "inferno"
     stretch: str = "asinh"
-
-class CitizenClassificationSubmission(BaseModel):
-    candidate_id: str
-    user_identifier: str = "anonymous_citizen"
-    is_real_motion: bool
-    motion_direction: Optional[str] = None
-    is_variable_brightness: bool
-    is_image_artifact: bool
-    artifact_type: Optional[str] = None
-    confidence_rating: int = Field(..., ge=1, le=5)
-    notes: Optional[str] = None
-
-class CitizenClassificationStats(BaseModel):
-    candidate_id: str
-    total_votes: int
-    motion_votes: int
-    variable_votes: int
-    artifact_votes: int
-    consensus_rating: float
-    classifications: List[Dict[str, Any]]

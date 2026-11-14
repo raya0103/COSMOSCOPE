@@ -125,6 +125,7 @@ def extract_spectrum_from_observations(
             "flux_density_mjy_sr": round(float(f_mjy), 4),
             "flux_error_ujy": round(float(f_err), 2),
             "is_direct_observation": observed,
+            "provenance_tier": "MEASURED" if observed else "SIMULATED / MODELLED / INTERPOLATED",
             "data_origin": "Measured Detector Band" if observed else "Continuum Model Interpolation"
         })
         
@@ -133,12 +134,20 @@ def extract_spectrum_from_observations(
     fluxes = np.array([c["flux_density_ujy"] for c in sed_channels])
     
     ice_features = _analyze_ice_absorption(waves, fluxes)
+    n_measured = sum(1 for c in sed_channels if c["is_direct_observation"])
+    n_modelled = len(sed_channels) - n_measured
     
     return {
         "channels_count": len(sed_channels),
+        "measured_channels_count": n_measured,
+        "modelled_channels_count": n_modelled,
         "wavelength_range_um": [0.75, 5.0],
         "spectrum": sed_channels,
         "ice_features": ice_features,
+        "provenance_summary": {
+            "MEASURED": f"{n_measured} channels with direct observation coverage in current data release.",
+            "SIMULATED_OR_MODELLED": f"{n_modelled} channels synthesized from spectral continuum and adjacent bands."
+        },
         "bandpass_scope_notes": (
             "SPHEREx observes between 0.75 and 5.00 µm across 6 linear variable filter detector arrays. "
             "Mid-infrared features such as the 9.7 µm silicate Si-O stretch lie outside SPHEREx coverage "
@@ -146,7 +155,8 @@ def extract_spectrum_from_observations(
             "H2O (3.05 µm), CO2 (4.27 µm), and CO (4.67 µm)."
         ),
         "summary": (
-            f"Extracted 102-band spectrophotometric SED covering 0.75 to 5.00 µm across all 6 detector arrays. "
+            f"Extracted 102-band spectrophotometric SED covering 0.75 to 5.00 µm across all 6 detector arrays "
+            f"({n_measured} measured, {n_modelled} continuum modelled). "
             f"H2O Ice optical depth: {ice_features['h2o_ice']['tau']:.3f}, "
             f"CO2 Ice optical depth: {ice_features['co2_ice']['tau']:.3f}."
         )

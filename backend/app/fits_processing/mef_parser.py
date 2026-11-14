@@ -62,6 +62,10 @@ def parse_mef_file(
             
         # Optional angular cutout extraction via Astropy Cutout2D
         active_wcs = None
+        valid_pixel_mask = np.isfinite(img_data)
+        is_padded_cutout = False
+        valid_pixel_fraction = 1.0
+
         try:
             spatial_wcs = WCS(img_hdr)
             active_wcs = spatial_wcs
@@ -74,16 +78,32 @@ def parse_mef_file(
                     mid_y, mid_x = img_data.shape[0] / 2.0, img_data.shape[1] / 2.0
                     center_sky = spatial_wcs.pixel_to_world(mid_x, mid_y)
                 
+                # Cutout image data with np.nan for unobserved/out-of-bounds regions
                 cutout_obj = Cutout2D(
                     img_data,
                     position=center_sky,
                     size=(fov_val * u.arcmin, fov_val * u.arcmin),
                     wcs=spatial_wcs,
                     mode='partial',
-                    fill_value=0.0
+                    fill_value=np.nan
                 )
                 img_data = cutout_obj.data
                 active_wcs = cutout_obj.wcs
+
+                # Cutout boolean validity mask (True for genuine observations, False for padded out-of-bounds)
+                cutout_mask = Cutout2D(
+                    valid_pixel_mask.astype(np.uint8),
+                    position=center_sky,
+                    size=(fov_val * u.arcmin, fov_val * u.arcmin),
+                    wcs=spatial_wcs,
+                    mode='partial',
+                    fill_value=0
+                )
+                valid_pixel_mask = (cutout_mask.data > 0) & np.isfinite(img_data)
+                valid_count = int(np.count_nonzero(valid_pixel_mask))
+                total_count = int(valid_pixel_mask.size)
+                valid_pixel_fraction = round(float(valid_count / max(1, total_count)), 4)
+                is_padded_cutout = valid_count < total_count
         except Exception:
             pass
 
@@ -92,19 +112,25 @@ def parse_mef_file(
         result["bunit"] = img_hdr.get("BUNIT", "MJy / sr")
         result["detector"] = int(img_hdr.get("DETECTOR", 1))
         result["date_obs"] = img_hdr.get("DATE-OBS", img_hdr.get("DATE", ""))
+        result["is_padded_cutout"] = is_padded_cutout
+        result["valid_pixel_fraction"] = valid_pixel_fraction
+        result["valid_mask"] = valid_pixel_mask.tolist()
+        result["coverage_status"] = (
+            "COMPLETE_ARCHIVE_COVERAGE" if not is_padded_cutout else 
+            f"PARTIAL_ARCHIVE_COVERAGE ({int(valid_pixel_fraction*100)}% valid pixels, {int((1-valid_pixel_fraction)*100)}% padded border)"
+        )
         
         # Clean NaNs and infs for statistics & visualization
-        valid_mask = np.isfinite(img_data)
+        # Only compute genuine statistics on authentically observed pixels!
         clean_img = np.array(img_data, copy=True)
-        if np.any(valid_mask):
-            valid_pixels = img_data[valid_mask]
+        if np.any(valid_pixel_mask):
+            valid_pixels = img_data[valid_pixel_mask]
             result["min_flux"] = float(np.min(valid_pixels))
             result["max_flux"] = float(np.max(valid_pixels))
             result["median_flux"] = float(np.median(valid_pixels))
             result["std_flux"] = float(np.std(valid_pixels))
-            # Missing or unobserved cutout border pixels should be zeroed
-            # (never imputed with peak flux, which corrupts aperture photometry)
-            clean_img[~valid_mask] = 0.0
+            # Set unobserved padded border pixels to 0.0 for clean matrix transmission
+            clean_img[~valid_pixel_mask] = 0.0
         else:
             clean_img = np.nan_to_num(clean_img, nan=0.0)
         

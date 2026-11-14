@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Play, Pause, SkipBack, SkipForward, Clock, Layers, Sparkles, 
-  Activity, Compass, ArrowRight, Eye, ShieldCheck, AlertCircle, Info, ExternalLink
+  Activity, Compass, ArrowRight, Eye, ShieldCheck, AlertCircle, Info, ExternalLink, FileCheck2
 } from 'lucide-react';
 import SearchHeader from '../components/SearchHeader';
 import FITSViewerCanvas from '../visualizations/FITSViewerCanvas';
@@ -244,6 +244,15 @@ export default function CosmicTimeMachine() {
             <span>🧪 Simulation Mode</span>
           </button>
         </div>
+
+        <button
+          onClick={() => navigate(`/dossier?ra=${coords.ra}&dec=${coords.dec}&name=${encodeURIComponent(coords.name || '')}&fov=${fov}`)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-600/30 hover:bg-violet-600/50 border border-violet-500/50 text-violet-200 text-xs font-semibold shadow-sm transition-all"
+          title="Open Scientific Evidence Dossier for current coordinates"
+        >
+          <FileCheck2 className="w-3.5 h-3.5 text-cyan-400" />
+          <span>Scientific Evidence Dossier</span>
+        </button>
       </div>
 
       {/* Comparison Feasibility Notice Banner */}

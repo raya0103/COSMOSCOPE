@@ -299,11 +299,11 @@ export default function ScientificAnalytics() {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate(`/passport?ra=${ra}&dec=${dec}&name=${encodeURIComponent(targetName)}`)}
+              onClick={() => navigate(`/dossier?ra=${ra}&dec=${dec}&name=${encodeURIComponent(targetName)}`)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all"
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>Export PDF Dossier</span>
+              <span>Scientific Evidence Dossier</span>
             </button>
           </div>
         </div>

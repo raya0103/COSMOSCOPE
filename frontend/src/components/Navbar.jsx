@@ -9,7 +9,6 @@ import {
   Globe2, 
   BookOpen, 
   FileCheck2, 
-  Users, 
   Radio,
   Sun,
   Moon,
@@ -30,8 +29,7 @@ const navItems = [
   { name: 'Analytics', path: '/analytics', icon: BarChart3 },
   { name: 'Multi-Mission', path: '/multi-mission', icon: Globe2 },
   { name: 'Research Library', path: '/research', icon: BookOpen },
-  { name: 'Evidence Passport', path: '/passport', icon: FileCheck2 },
-  { name: 'Citizen Science', path: '/citizen', icon: Users },
+  { name: 'Evidence Dossier', path: '/dossier', icon: FileCheck2 },
 ];
 
 export default function Navbar() {
