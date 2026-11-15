@@ -11,6 +11,7 @@ import {
   Loader2,
   FileText
 } from 'lucide-react';
+import { getApiBase } from '../services/api';
 
 export default function TutorialGuideSection() {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -28,7 +29,7 @@ export default function TutorialGuideSection() {
       // First attempt: API endpoint which dynamically builds or streams the verified PDF
       let response;
       try {
-        response = await fetch('/api/tutorial/download');
+        response = await fetch(`${getApiBase()}/tutorial/download`);
       } catch (err) {
         console.warn('API endpoint unavailable, falling back to static guide asset...', err);
       }

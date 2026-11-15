@@ -60,7 +60,11 @@ export default function Navbar() {
           <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
             <AlertTriangle className="w-4 h-4 flex-shrink-0 animate-bounce" />
             <span>
-              <strong>FastAPI Backend Offline:</strong> Port 8000 is not reachable. In a new terminal run: <code className="bg-black/30 px-2 py-0.5 rounded font-mono">cd backend; python -m uvicorn app.main:app --reload --port 8000</code> or launch <code className="bg-black/30 px-2 py-0.5 rounded font-mono">start.bat</code>.
+              <strong>Backend Connecting…</strong>{' '}
+              {import.meta.env.VITE_API_BASE_URL
+                ? <>Science data is loading from <code className="bg-black/30 px-2 py-0.5 rounded font-mono">{import.meta.env.VITE_API_BASE_URL}</code>. If this persists, the Render service may be waking up — please wait a few seconds.</>
+                : <>Port 8000 is not reachable. In a new terminal run: <code className="bg-black/30 px-2 py-0.5 rounded font-mono">cd backend; python -m uvicorn app.main:app --reload --port 8000</code> or launch <code className="bg-black/30 px-2 py-0.5 rounded font-mono">start.bat</code>.</>
+              }
             </span>
           </div>
         </div>
