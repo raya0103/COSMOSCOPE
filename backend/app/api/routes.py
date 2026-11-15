@@ -1031,3 +1031,55 @@ def detect_multi_epoch_changes_endpoint(req: ChangeDetectionRequest):
         fov_arcmin=req.fov_arcmin,
         target_name=req.target_name
     )
+
+# ---------------------------------------------------------------------------
+# Complete Interactive Website Tutorial PDF Endpoints
+# ---------------------------------------------------------------------------
+from app.reports.tutorial_pdf import generate_tutorial_pdf
+
+@router.get("/tutorial/download")
+def download_tutorial_pdf_endpoint():
+    """
+    Downloads the comprehensive, publication-grade COSMOSCOPE User Guide & Scientific Tutorial PDF.
+    Contains all 16 chapters detailing platform architecture, workflows, modules, and provenance.
+    """
+    pdf_bytes = generate_tutorial_pdf()
+    filename = "COSMOSCOPE_Complete_User_Guide.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "public, max-age=3600"
+        }
+    )
+
+@router.get("/tutorial/info")
+def get_tutorial_info_endpoint():
+    """Returns metadata and chapter outlines for the COSMOSCOPE User Guide."""
+    return {
+        "title": "COSMOSCOPE Complete User Guide & Scientific Tutorial",
+        "filename": "COSMOSCOPE_Complete_User_Guide.pdf",
+        "format": "A4 PDF",
+        "version": "2.2.0",
+        "chapters_count": 16,
+        "topics": [
+            "Introduction to COSMOSCOPE",
+            "Understanding the Homepage",
+            "Dashboard Overview",
+            "Sky Explorer",
+            "Cosmic Time Machine",
+            "Spectral Lab",
+            "Image Analysis Lab",
+            "Discovery Engine",
+            "Multi-Mission Explorer",
+            "Research Library",
+            "Scientific Evidence Dossier",
+            "Scientific Analytics",
+            "Understanding Astronomical Data",
+            "Data Sources and Reliability",
+            "Frequently Asked Questions",
+            "Quick Start Guide"
+        ]
+    }
+

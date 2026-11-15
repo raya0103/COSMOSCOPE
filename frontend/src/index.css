@@ -571,6 +571,30 @@ html.light .cosmoscope-landing #faq [id^="faq-answer-"] .text-slate-300 {
   color: #475569 !important;
 }
 
+/* 9.13b Tutorial User Guide Section in Light Mode */
+html.light .cosmoscope-landing #tutorial [class*="bg-gradient"] {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 249, 255, 0.95), rgba(255, 255, 255, 0.98)) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 12px 35px -5px rgba(15, 23, 42, 0.08) !important;
+}
+html.light .cosmoscope-landing #tutorial h3 {
+  color: #091124 !important;
+}
+html.light .cosmoscope-landing #tutorial p {
+  color: #334155 !important;
+}
+html.light .cosmoscope-landing #tutorial [class*="bg-[#0B1730]"] {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html.light .cosmoscope-landing #tutorial span.text-\[\#C4D0E0\] {
+  color: #334155 !important;
+}
+html.light .cosmoscope-landing #tutorial .text-\[\#91A3BA\] {
+  color: #475569 !important;
+}
+
 /* 9.14 Footer in Light Mode */
 html.light .cosmoscope-landing footer {
   background-color: rgba(244, 247, 251, 0.98) !important;

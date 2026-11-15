@@ -32,6 +32,7 @@ import {
 import SearchHeader from '../components/SearchHeader';
 import FullPageGalaxyBackground from '../components/FullPageGalaxyBackground';
 import FaqSection from '../components/FaqSection';
+import TutorialGuideSection from '../components/TutorialGuideSection';
 import { api } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 
@@ -165,10 +166,14 @@ export default function Home() {
               </Link>
 
               {/* Desktop Navigation Links */}
-              <div className="hidden lg:flex items-center gap-8 text-sm font-semibold text-[#C4D0E0]">
+              <div className="hidden lg:flex items-center gap-7 text-sm font-semibold text-[#C4D0E0]">
                 <a href="#about" className="hover:text-[#36DDF5] transition-colors">About</a>
                 <a href="#science" className="hover:text-[#36DDF5] transition-colors">Science</a>
                 <a href="#how-it-works" className="hover:text-[#36DDF5] transition-colors">How It Works</a>
+                <a href="#tutorial" className="hover:text-[#36DDF5] transition-colors text-cyan-300 font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+                  <BookOpen className="w-3.5 h-3.5 text-[#36DDF5]" />
+                  <span>Tutorial Guide</span>
+                </a>
                 <a href="#discoveries" className="hover:text-[#36DDF5] transition-colors">Discoveries</a>
                 <a href="#sources" className="hover:text-[#36DDF5] transition-colors">Data Sources</a>
                 <a href="#faq" className="hover:text-[#36DDF5] transition-colors">FAQ</a>
@@ -226,6 +231,10 @@ export default function Home() {
                 <a href="#about" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1">About</a>
                 <a href="#science" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1">Science</a>
                 <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1">How It Works</a>
+                <a href="#tutorial" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1 flex items-center gap-2 text-cyan-300 font-semibold">
+                  <BookOpen className="w-4 h-4 text-[#36DDF5]" />
+                  <span>Tutorial Guide (PDF)</span>
+                </a>
                 <a href="#discoveries" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1">Discoveries</a>
                 <a href="#sources" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1">Data Sources</a>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#36DDF5] py-1">FAQ</a>
@@ -605,6 +614,11 @@ export default function Home() {
             </div>
 
           </div>
+
+          {/* =========================================================================
+              Tutorial User Guide Download Section (Immediately below 3 cards)
+              ========================================================================= */}
+          <TutorialGuideSection />
         </section>
 
         {/* =========================================================================
@@ -1099,6 +1113,7 @@ export default function Home() {
                   <li><a href="#about" className="hover:text-[#36DDF5] transition-colors">About the Mission</a></li>
                   <li><a href="#science" className="hover:text-[#36DDF5] transition-colors">Science Modules</a></li>
                   <li><a href="#how-it-works" className="hover:text-[#36DDF5] transition-colors">How It Works</a></li>
+                  <li><a href="#tutorial" className="hover:text-[#36DDF5] transition-colors text-cyan-300 font-medium">Tutorial User Guide (PDF)</a></li>
                   <li><a href="#discoveries" className="hover:text-[#36DDF5] transition-colors">Research Targets</a></li>
                   <li><a href="#sources" className="hover:text-[#36DDF5] transition-colors">Data Sources & Transparency</a></li>
                   <li><a href="#faq" className="hover:text-[#36DDF5] transition-colors">FAQ</a></li>

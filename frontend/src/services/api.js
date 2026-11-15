@@ -137,6 +137,11 @@ export const api = {
     fetchJson('/time-machine/detect-changes', {
       method: 'POST',
       body: JSON.stringify(params),
-    })
+    }),
+
+  // Tutorial User Guide PDF Endpoints
+  downloadTutorialPdfUrl: () => `${BASE_URL}/tutorial/download`,
+  getTutorialInfo: () => fetchJson('/tutorial/info')
 };
+
 
