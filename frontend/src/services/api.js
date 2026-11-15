@@ -131,5 +131,12 @@ export const api = {
     fetchJson(`/time-machine/multimission?ra=${ra}&dec=${dec}&target_name=${encodeURIComponent(targetName)}`),
 
   getTimeMachineAnalytics: (ra, dec, targetName = '', mode = 'spherex') =>
-    fetchJson(`/time-machine/analytics?ra=${ra}&dec=${dec}&target_name=${encodeURIComponent(targetName)}&mode=${mode}`)
+    fetchJson(`/time-machine/analytics?ra=${ra}&dec=${dec}&target_name=${encodeURIComponent(targetName)}&mode=${mode}`),
+
+  detectEpochChanges: (params) =>
+    fetchJson('/time-machine/detect-changes', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    })
 };
+

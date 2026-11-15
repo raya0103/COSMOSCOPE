@@ -16,8 +16,11 @@ from app.models.schemas import (
     ObservationRecord,
     MultiMissionEpoch,
     MultiMissionResponse,
-    ImageOperationRequest
+    ImageOperationRequest,
+    ChangeDetectionRequest
 )
+from app.detection.change_detector import analyze_multi_epoch_changes
+
 from app.fits_processing.coordinates import (
     parse_and_validate_coordinates,
     resolve_target_name,
@@ -1008,3 +1011,23 @@ def get_anomaly_radar_endpoint(query: CoordinateInput):
     """Essential Graph 6: 4-Axis Anomaly Polar Radar & Candidate Ranking Visualization."""
     ra_deg, dec_deg, _, _, _ = parse_and_validate_coordinates(query.ra, query.dec, query.target_name)
     return get_target_anomaly_radar(ra_deg, dec_deg, query.target_name)
+
+@router.post("/time-machine/detect-changes")
+def detect_multi_epoch_changes_endpoint(req: ChangeDetectionRequest):
+    """
+    Automated Multi-Epoch Astronomical Change Detection.
+    Scans epochs and classifies candidates into:
+    - Moving object candidates
+    - Previously unidentified sources
+    - Known asteroid candidates
+    - Sources that significantly brighten / dim
+    - Disappearing / appearing sources
+    - Single-exposure artifacts / glitches
+    """
+    return analyze_multi_epoch_changes(
+        obs_ids=req.obs_ids,
+        ra=req.ra,
+        dec=req.dec,
+        fov_arcmin=req.fov_arcmin,
+        target_name=req.target_name
+    )

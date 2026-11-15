@@ -163,3 +163,11 @@ class ImageOperationRequest(BaseModel):
     normalize: bool = True
     color_map: str = "inferno"
     stretch: str = "asinh"
+
+class ChangeDetectionRequest(BaseModel):
+    obs_ids: List[str] = Field(default_factory=list)
+    ra: float
+    dec: float
+    fov_arcmin: float = 3.0
+    target_name: Optional[str] = None
+

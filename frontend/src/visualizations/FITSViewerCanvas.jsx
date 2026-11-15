@@ -18,7 +18,14 @@ export default function FITSViewerCanvas({
   predictedCentroid = null, // { x, y } in pixel coords from Gaia DR3
   showAstrometry = true,
   provenanceLabel = "● NASA/IPAC IRSA",
-  modeBadge = null
+  modeBadge = null,
+  motionTrails = null,
+  activeCandidates = null,
+  selectedCandidateId = null,
+  onSelectCandidate = null,
+  onCanvasRef = null,
+  differenceStats = null,
+  stackStats = null
 }) {
   const canvasRef = useRef(null);
   const [zoom, setZoom] = useState(1);
@@ -29,6 +36,13 @@ export default function FITSViewerCanvas({
   const [showCrosshair, setShowCrosshair] = useState(true);
   const [renderMode, setRenderMode] = useState('smooth'); // 'smooth' (default, natural star view) or 'pixelated' (raw detector blocks)
   const [blinkState, setBlinkState] = useState(0); // 0 = primary, 1 = secondary
+
+  useEffect(() => {
+    if (onCanvasRef && canvasRef.current) {
+      onCanvasRef(canvasRef.current);
+    }
+  }, [onCanvasRef]);
+
 
   // Blinking Timer
   useEffect(() => {
@@ -325,10 +339,10 @@ export default function FITSViewerCanvas({
               display: 'block' 
             }}
           />
-          {/* Astrometric Centroid & Gaia DR3 Overlays */}
-          {showAstrometry && activeData && activeData.length > 0 && (
+          {/* Astrometric Centroid, Gaia DR3, Motion Trails, and Candidate Overlays */}
+          {activeData && activeData.length > 0 && (
             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 440 440">
-              {measuredCentroid && (
+              {showAstrometry && measuredCentroid && (
                 <g>
                   {/* Measured Sub-Pixel Centroid: Green Circle & Reticle */}
                   {(() => {
@@ -350,7 +364,7 @@ export default function FITSViewerCanvas({
                   })()}
                 </g>
               )}
-              {predictedCentroid && (
+              {showAstrometry && predictedCentroid && (
                 <g>
                   {/* Gaia DR3 Predicted Position: Blue/Indigo Diamond */}
                   {(() => {
@@ -375,6 +389,162 @@ export default function FITSViewerCanvas({
                   })()}
                 </g>
               )}
+
+              {/* Motion Trails Overlay */}
+              {motionTrails && motionTrails.length > 0 && (
+                <g>
+                  {motionTrails.map((trail, tIdx) => {
+                    const rows = activeData.length;
+                    const cols = activeData[0]?.length || 1;
+                    const pts = trail.points.map(p => ({
+                      x: (p.pixel_x / cols) * 440,
+                      y: ((rows - 1 - p.pixel_y) / rows) * 440
+                    }));
+                    if (pts.length < 2) return null;
+                    const pointsStr = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+                    const firstPt = pts[0];
+                    const lastPt = pts[pts.length - 1];
+                    const color = trail.color || '#06b6d4';
+
+                    return (
+                      <g key={`trail_${tIdx}`}>
+                        {/* Trajectory Polyline */}
+                        <polyline
+                          points={pointsStr}
+                          stroke={color}
+                          strokeWidth="2.5"
+                          strokeDasharray="4,2"
+                          fill="none"
+                          opacity="0.9"
+                        />
+                        {/* Epoch Points along track */}
+                        {pts.map((pt, pIdx) => (
+                          <circle
+                            key={`pt_${tIdx}_${pIdx}`}
+                            cx={pt.x}
+                            cy={pt.y}
+                            r={pIdx === pts.length - 1 ? "4.5" : "3"}
+                            fill={pIdx === pts.length - 1 ? color : "#ffffff"}
+                            stroke={color}
+                            strokeWidth="1.5"
+                          />
+                        ))}
+                        {/* Direction Arrow Vector from start to end */}
+                        <line
+                          x1={firstPt.x}
+                          y1={firstPt.y}
+                          x2={lastPt.x}
+                          y2={lastPt.y}
+                          stroke={color}
+                          strokeWidth="1.5"
+                          opacity="0.6"
+                        />
+                        <text
+                          x={lastPt.x + 8}
+                          y={lastPt.y - 6}
+                          fill={color}
+                          fontSize="10"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                        >
+                          {trail.candidate_id} ({trail.classification?.split(' ')[0]})
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+
+              {/* Clickable Candidate Markers Overlay */}
+              {activeCandidates && activeCandidates.length > 0 && (
+                <g className="pointer-events-auto">
+                  {activeCandidates.map((cand) => {
+                    const rows = activeData.length;
+                    const cols = activeData[0]?.length || 1;
+                    const first = cand.trajectory?.[0];
+                    const px = first ? (first.pixel_x / cols) * 440 : 220;
+                    const py = first ? ((rows - 1 - first.pixel_y) / rows) * 440 : 220;
+                    const isSelected = selectedCandidateId === cand.candidate_id;
+                    const color = cand.category === 'moving_objects' 
+                      ? '#06b6d4' 
+                      : (cand.category === 'brightened_dimmed' ? '#ec4899' : (cand.category === 'known_asteroids' ? '#f59e0b' : '#a855f7'));
+
+                    return (
+                      <g
+                        key={cand.candidate_id}
+                        className="cursor-pointer group"
+                        onClick={() => onSelectCandidate && onSelectCandidate(cand)}
+                      >
+                        <circle
+                          cx={px}
+                          cy={py}
+                          r={isSelected ? "14" : "10"}
+                          stroke={color}
+                          strokeWidth={isSelected ? "3" : "1.8"}
+                          fill={isSelected ? `${color}33` : "none"}
+                          className="transition-all duration-200"
+                        />
+                        {isSelected && (
+                          <circle
+                            cx={px}
+                            cy={py}
+                            r="18"
+                            stroke={color}
+                            strokeWidth="1"
+                            strokeDasharray="2,2"
+                            fill="none"
+                            className="animate-spin"
+                          />
+                        )}
+                        <text
+                          x={px + 12}
+                          y={py + 3}
+                          fill={color}
+                          fontSize="9"
+                          fontFamily="monospace"
+                          fontWeight="bold"
+                          className="drop-shadow-md"
+                        >
+                          {cand.candidate_id}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </g>
+              )}
+
+              {/* Difference Stats Overlay (Difference Mode) */}
+              {differenceStats && (
+                <g transform="translate(10, 15)">
+                  <rect width="180" height="52" rx="6" fill="#071225" fillOpacity="0.88" stroke="#3b82f6" strokeWidth="1" />
+                  <text x="8" y="15" fill="#60a5fa" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                    DIFFERENCE IMAGE STATS
+                  </text>
+                  <text x="8" y="30" fill="#94a3b8" fontSize="9" fontFamily="monospace">
+                    MAD σ: <tspan fill="#38bdf8">{differenceStats.sigma_diff?.toFixed(4)}</tspan> MJy/sr
+                  </text>
+                  <text x="8" y="44" fill="#94a3b8" fontSize="9" fontFamily="monospace">
+                    &gt;3σ Pos: <tspan fill="#10b981">{differenceStats.pos_excursions}</tspan> | &lt;-3σ: <tspan fill="#ef4444">{differenceStats.neg_excursions}</tspan>
+                  </text>
+                </g>
+              )}
+
+              {/* Stack Stats Overlay (Stack Mode) */}
+              {stackStats && (
+                <g transform="translate(10, 15)">
+                  <rect width="180" height="52" rx="6" fill="#071225" fillOpacity="0.88" stroke="#a855f7" strokeWidth="1" />
+                  <text x="8" y="15" fill="#c084fc" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                    COADDED STACK STATS
+                  </text>
+                  <text x="8" y="30" fill="#94a3b8" fontSize="9" fontFamily="monospace">
+                    Frames: <tspan fill="#e2e8f0">{stackStats.n_stacked}</tspan> | SNR Gain: <tspan fill="#10b981">+{stackStats.snr_gain?.toFixed(2)}×</tspan>
+                  </text>
+                  <text x="8" y="44" fill="#94a3b8" fontSize="9" fontFamily="monospace">
+                    Noise Reduction: <tspan fill="#38bdf8">{stackStats.noise_reduction_pct?.toFixed(1)}%</tspan>
+                  </text>
+                </g>
+              )}
+
               {/* Scale bar in bottom-left: ~30 arcsec */}
               <g transform="translate(16, 420)">
                 <line x1="0" y1="0" x2="35" y2="0" stroke="white" strokeWidth="2" />
@@ -384,6 +554,7 @@ export default function FITSViewerCanvas({
               </g>
             </svg>
           )}
+
           {showCrosshair && (
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
               {/* Central Photometry Aperture Ring */}
