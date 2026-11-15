@@ -19,21 +19,24 @@ export default function SourceInvestigationModal({
   const lightCurveData = candidate.light_curve && candidate.light_curve.length > 0 ? {
     data: [
       {
-        x: candidate.light_curve.map(p => p.date_obs || `Epoch ${p.epoch_index + 1}`),
+        x: candidate.light_curve.map((p, idx) => {
+          if (p.date_obs) {
+            return p.date_obs.includes('T') ? p.date_obs.split('T')[0] : p.date_obs;
+          }
+          return `Epoch ${p.epoch_index !== undefined ? p.epoch_index + 1 : idx + 1}`;
+        }),
         y: candidate.light_curve.map(p => p.flux),
         mode: 'lines+markers',
         name: 'Infrared Flux',
         line: { color: '#ec4899', width: 2.5 },
-        marker: { size: 9, color: '#ec4899' }
+        marker: { size: 8, color: '#ec4899' },
+        hovertemplate: 'Date: %{x}<br>Flux: %{y:.2f} MJy/sr<extra></extra>'
       }
     ],
     layout: {
-      title: { text: "Multi-Epoch Flux Evolution", font: { size: 12, color: "#f8fafc" } },
-      xaxis: { title: "Observation Epoch", color: "#94a3b8", gridcolor: "rgba(255,255,255,0.06)" },
-      yaxis: { title: "Surface Brightness (MJy/sr)", color: "#94a3b8", gridcolor: "rgba(255,255,255,0.06)" },
-      paper_bgcolor: "transparent",
-      plot_bgcolor: "transparent",
-      margin: { l: 45, r: 15, t: 30, b: 40 }
+      xaxis: { title: "Observation Epoch" },
+      yaxis: { title: "Surface Brightness (MJy/sr)" },
+      margin: { l: 55, r: 20, t: 15, b: 45 }
     }
   } : null;
 
@@ -44,26 +47,24 @@ export default function SourceInvestigationModal({
         x: candidate.trajectory.map(p => p.ra),
         y: candidate.trajectory.map(p => p.dec),
         mode: 'lines+markers+text',
-        name: 'Astrometric Track',
-        text: candidate.trajectory.map(p => `Ep #${p.epoch_index + 1}`),
+        name: 'Sky Trajectory',
+        text: candidate.trajectory.map((p, idx) => `Ep #${p.epoch_index !== undefined ? p.epoch_index + 1 : idx + 1}`),
         textposition: 'top center',
         line: { color: '#06b6d4', width: 2, dash: 'dot' },
-        marker: { size: 8, color: '#06b6d4' }
+        marker: { size: 8, color: '#06b6d4' },
+        hovertemplate: 'Epoch: %{text}<br>RA: %{x:.5f}°<br>Dec: %{y:.5f}°<extra></extra>'
       }
     ],
     layout: {
-      title: { text: "Sky Coordinate Trajectory (RA vs Dec)", font: { size: 12, color: "#f8fafc" } },
-      xaxis: { title: "RA (deg)", color: "#94a3b8", gridcolor: "rgba(255,255,255,0.06)" },
-      yaxis: { title: "Dec (deg)", color: "#94a3b8", gridcolor: "rgba(255,255,255,0.06)" },
-      paper_bgcolor: "transparent",
-      plot_bgcolor: "transparent",
-      margin: { l: 55, r: 15, t: 30, b: 40 }
+      xaxis: { title: "Right Ascension (deg)" },
+      yaxis: { title: "Declination (deg)" },
+      margin: { l: 60, r: 20, t: 15, b: 45 }
     }
   } : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="astro-card w-full max-w-3xl rounded-2xl border border-cyan-500/40 p-6 space-y-5 max-h-[90vh] overflow-y-auto bg-gradient-to-b from-space-900 to-space-950 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="astro-card w-full max-w-4xl my-auto rounded-2xl border border-cyan-500/40 p-6 space-y-5 bg-gradient-to-b from-space-900 to-space-950 shadow-2xl">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-space-border/80">
@@ -160,28 +161,42 @@ export default function SourceInvestigationModal({
         )}
 
         {/* Charts: Light Curve & Astrometry */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {lightCurveData && (
-            <div className="h-[240px] w-full p-2 rounded-xl bg-space-950 border border-space-border">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
+          <div className="w-full min-h-[300px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
+            {lightCurveData ? (
               <PlotlyChart
                 data={lightCurveData.data}
                 layout={lightCurveData.layout}
                 className="w-full h-full"
-                title="Light Curve"
+                title="Light Curve — Multi-Epoch Flux Evolution"
+                downloadFileName={`cosmoscope_lightcurve_${candidate.candidate_id}`}
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-slate-400 font-mono text-xs">
+                <Activity className="w-8 h-8 text-pink-400/40 mb-2" />
+                <span className="font-semibold text-slate-300">Single-Epoch Transient</span>
+                <span className="text-[11px] text-slate-500 mt-1">Multi-epoch flux evolution requires ≥2 observation detections.</span>
+              </div>
+            )}
+          </div>
 
-          {trajectoryData && (
-            <div className="h-[240px] w-full p-2 rounded-xl bg-space-950 border border-space-border">
+          <div className="w-full min-h-[300px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
+            {trajectoryData ? (
               <PlotlyChart
                 data={trajectoryData.data}
                 layout={trajectoryData.layout}
                 className="w-full h-full"
-                title="Astrometric Trajectory"
+                title="Astrometric Trajectory — Sky Coordinate Track"
+                downloadFileName={`cosmoscope_trajectory_${candidate.candidate_id}`}
               />
-            </div>
-          )}
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-slate-400 font-mono text-xs">
+                <Navigation className="w-8 h-8 text-cyan-400/40 mb-2" />
+                <span className="font-semibold text-slate-300">Single-Epoch Centroid</span>
+                <span className="text-[11px] text-slate-500 mt-1">Proper motion trajectory requires ≥2 observation detections.</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Catalog Identification Information */}

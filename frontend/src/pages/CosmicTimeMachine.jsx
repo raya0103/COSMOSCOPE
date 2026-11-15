@@ -746,7 +746,6 @@ export default function CosmicTimeMachine() {
                   selectedCandidateId={selectedCandidate?.candidate_id}
                   onSelectCandidate={(cand) => {
                     setSelectedCandidate(cand);
-                    setInvestigatingCandidate(cand);
                   }}
                   differenceStats={diffStats}
                   stackStats={stckStats}
@@ -1048,9 +1047,10 @@ export default function CosmicTimeMachine() {
         selectedCandidate={selectedCandidate}
         onSelectCandidate={(cand) => {
           setSelectedCandidate(cand);
-          setInvestigatingCandidate(cand);
         }}
-        onInvestigate={(cand) => setInvestigatingCandidate(cand)}
+        onInvestigate={(cand) => {
+          setSelectedCandidate(cand);
+        }}
         loading={changeDetectionLoading}
         targetName={coords.name}
       />

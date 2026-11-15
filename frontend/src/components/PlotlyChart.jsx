@@ -93,13 +93,34 @@ export default function PlotlyChart({
 
     const handleResize = () => {
       if (containerRef.current && window.Plotly) {
-        window.Plotly.Plots.resize(containerRef.current);
+        try {
+          window.Plotly.Plots.resize(containerRef.current);
+        } catch (e) {}
       }
     };
 
     window.addEventListener('resize', handleResize);
+
+    // ResizeObserver ensures Plotly resizes when accordion or container expands
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Trigger an additional resize after initial render to catch expansion animation finishes
+    const timer = setTimeout(() => {
+      handleResize();
+    }, 150);
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      clearTimeout(timer);
     };
   }, [plotlyLoaded, data, layout, config, theme, title]);
 
@@ -115,17 +136,17 @@ export default function PlotlyChart({
   };
 
   return (
-    <div className="relative w-full rounded-xl overflow-hidden border border-space-border/70 bg-space-900/60 shadow-lg group">
+    <div className="relative w-full h-full min-h-0 flex flex-col rounded-xl overflow-hidden border border-space-border/70 bg-space-900/60 shadow-lg group">
       {/* Header bar with title and quick download */}
       {title && (
-        <div className="flex items-center justify-between px-4 py-2 bg-space-850/80 border-b border-space-border/60">
-          <div className="flex items-center gap-2">
-            <BarChart2 className="w-4 h-4 text-cyan-400" />
-            <h4 className="text-xs font-bold tracking-wide text-slate-200">{title}</h4>
+        <div className="flex-shrink-0 flex items-center justify-between px-3.5 py-2 bg-space-850/90 border-b border-space-border/60">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <BarChart2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+            <h4 className="text-xs font-bold tracking-wide text-slate-200 truncate">{title}</h4>
           </div>
           <button
             onClick={handleManualDownload}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-space-800 hover:bg-space-700 text-[11px] font-mono text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all opacity-80 group-hover:opacity-100"
+            className="flex-shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded bg-space-800 hover:bg-space-700 text-[10px] font-mono text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 transition-all opacity-80 group-hover:opacity-100"
             title="Export high-resolution PNG chart"
           >
             <Download className="w-3 h-3" />
@@ -135,7 +156,7 @@ export default function PlotlyChart({
       )}
 
       {/* Plotly Canvas Container */}
-      <div ref={containerRef} className={className} />
+      <div ref={containerRef} className={`w-full flex-1 min-h-0 overflow-hidden ${className || ''}`} />
 
       {/* Loading state before Plotly script attaches */}
       {!plotlyLoaded && (
