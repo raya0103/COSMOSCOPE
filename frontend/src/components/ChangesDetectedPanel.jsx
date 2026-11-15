@@ -473,12 +473,12 @@ export default function ChangesDetectedPanel({
                     {/* Two Independent Scientific Charts: Side-by-Side on Desktop/Laptop, Stacked on Tablet/Mobile */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
                       {/* Chart 1: Light Curve — Multi-Epoch Flux Evolution */}
-                      <div className="w-full min-h-[300px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
+                      <div className="w-full min-h-[310px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
                         {hasLightCurve && lightCurveData ? (
                           <PlotlyChart
                             data={lightCurveData.data}
                             layout={lightCurveData.layout}
-                            className="w-full h-full"
+                            height={270}
                             title="Light Curve — Multi-Epoch Flux Evolution"
                             downloadFileName={`cosmoscope_lightcurve_${cand.candidate_id}`}
                           />
@@ -492,12 +492,12 @@ export default function ChangesDetectedPanel({
                       </div>
 
                       {/* Chart 2: Astrometric Trajectory — Sky Coordinate Trajectory (RA vs Dec) */}
-                      <div className="w-full min-h-[300px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
+                      <div className="w-full min-h-[310px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
                         {hasTrajectory && trajectoryData ? (
                           <PlotlyChart
                             data={trajectoryData.data}
                             layout={trajectoryData.layout}
-                            className="w-full h-full"
+                            height={270}
                             title="Astrometric Trajectory — Sky Coordinate Track"
                             downloadFileName={`cosmoscope_trajectory_${cand.candidate_id}`}
                           />

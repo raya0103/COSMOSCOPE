@@ -6,8 +6,9 @@ export default function PlotlyChart({
   data = [],
   layout = {},
   config = {},
-  className = "w-full h-80",
+  className = "",
   title = "",
+  height = 260,
   downloadFileName = "cosmoscope_scientific_plot"
 }) {
   const containerRef = useRef(null);
@@ -42,6 +43,9 @@ export default function PlotlyChart({
     const textColor = isDark ? '#e2e8f0' : '#1e293b';
     const gridColor = isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(203, 213, 225, 0.6)';
 
+    // Enforce explicit height so Plotly NEVER defaults to 450px and overflows
+    const effectiveHeight = height || (layout && layout.height) || 260;
+
     const defaultLayout = {
       autosize: true,
       paper_bgcolor: paperColor,
@@ -51,7 +55,7 @@ export default function PlotlyChart({
         color: textColor,
         size: 11
       },
-      margin: { l: 55, r: 25, t: title ? 35 : 15, b: 45 },
+      margin: { l: 55, r: 25, t: 20, b: 40 },
       xaxis: {
         gridcolor: gridColor,
         zerolinecolor: gridColor,
@@ -69,7 +73,8 @@ export default function PlotlyChart({
         bordercolor: '#00F0FF',
         font: { family: 'JetBrains Mono, monospace', color: isDark ? '#ffffff' : '#020617', size: 11 }
       },
-      ...layout
+      ...layout,
+      height: effectiveHeight // Explicitly lock height to prevent 450px overflow
     };
 
     const defaultConfig = {
@@ -122,7 +127,7 @@ export default function PlotlyChart({
       }
       clearTimeout(timer);
     };
-  }, [plotlyLoaded, data, layout, config, theme, title]);
+  }, [plotlyLoaded, data, layout, config, theme, title, height]);
 
   const handleManualDownload = () => {
     if (containerRef.current && window.Plotly) {
@@ -135,11 +140,13 @@ export default function PlotlyChart({
     }
   };
 
+  const effectiveHeight = height || (layout && layout.height) || 260;
+
   return (
-    <div className="relative w-full h-full min-h-0 flex flex-col rounded-xl overflow-hidden border border-space-border/70 bg-space-900/60 shadow-lg group">
+    <div className="relative w-full rounded-xl overflow-hidden border border-space-border/70 bg-space-900/60 shadow-lg flex flex-col">
       {/* Header bar with title and quick download */}
       {title && (
-        <div className="flex-shrink-0 flex items-center justify-between px-3.5 py-2 bg-space-850/90 border-b border-space-border/60">
+        <div className="flex-shrink-0 flex items-center justify-between px-3.5 py-2 bg-space-850/90 border-b border-space-border/60 h-[36px]">
           <div className="flex items-center gap-2 overflow-hidden">
             <BarChart2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
             <h4 className="text-xs font-bold tracking-wide text-slate-200 truncate">{title}</h4>
@@ -155,8 +162,12 @@ export default function PlotlyChart({
         </div>
       )}
 
-      {/* Plotly Canvas Container */}
-      <div ref={containerRef} className={`w-full flex-1 min-h-0 overflow-hidden ${className || ''}`} />
+      {/* Plotly Canvas Container with strict bounded height and overflow hidden */}
+      <div
+        ref={containerRef}
+        className={`w-full overflow-hidden ${className || ''}`}
+        style={{ height: `${effectiveHeight}px`, minHeight: `${effectiveHeight}px`, maxHeight: `${effectiveHeight}px` }}
+      />
 
       {/* Loading state before Plotly script attaches */}
       {!plotlyLoaded && (
@@ -168,3 +179,4 @@ export default function PlotlyChart({
     </div>
   );
 }
+

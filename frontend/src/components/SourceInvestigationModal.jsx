@@ -162,12 +162,12 @@ export default function SourceInvestigationModal({
 
         {/* Charts: Light Curve & Astrometry */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
-          <div className="w-full min-h-[300px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
+          <div className="w-full min-h-[310px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
             {lightCurveData ? (
               <PlotlyChart
                 data={lightCurveData.data}
                 layout={lightCurveData.layout}
-                className="w-full h-full"
+                height={270}
                 title="Light Curve — Multi-Epoch Flux Evolution"
                 downloadFileName={`cosmoscope_lightcurve_${candidate.candidate_id}`}
               />
@@ -180,12 +180,12 @@ export default function SourceInvestigationModal({
             )}
           </div>
 
-          <div className="w-full min-h-[300px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
+          <div className="w-full min-h-[310px] h-[320px] rounded-xl overflow-hidden bg-space-950 border border-space-border/80 flex flex-col">
             {trajectoryData ? (
               <PlotlyChart
                 data={trajectoryData.data}
                 layout={trajectoryData.layout}
-                className="w-full h-full"
+                height={270}
                 title="Astrometric Trajectory — Sky Coordinate Track"
                 downloadFileName={`cosmoscope_trajectory_${candidate.candidate_id}`}
               />

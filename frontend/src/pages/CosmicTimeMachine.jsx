@@ -1050,6 +1050,7 @@ export default function CosmicTimeMachine() {
         }}
         onInvestigate={(cand) => {
           setSelectedCandidate(cand);
+          setInvestigatingCandidate(cand);
         }}
         loading={changeDetectionLoading}
         targetName={coords.name}
