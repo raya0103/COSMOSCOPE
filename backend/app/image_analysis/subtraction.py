@@ -35,14 +35,17 @@ def compute_image_difference(
     arr1 = np.nan_to_num(img1, nan=0.0).astype(np.float32)
     arr2 = np.nan_to_num(img2, nan=0.0).astype(np.float32)
     
-    val1 = np.array(mask1, dtype=bool) if mask1 is not None else np.ones(arr1.shape, dtype=bool)
-    val2 = np.array(mask2, dtype=bool) if mask2 is not None else np.ones(arr2.shape, dtype=bool)
+    val1 = mask1 if mask1 is not None else (arr1 != 0)
+    val2 = mask2 if mask2 is not None else (arr2 != 0)
 
-    # Resample if shapes differ
-    if arr1.shape != arr2.shape:
-        zoom_factors = (arr1.shape[0] / arr2.shape[0], arr1.shape[1] / arr2.shape[1])
-        arr2 = zoom(arr2, zoom_factors, order=1)
-        val2 = zoom(val2.astype(np.float32), zoom_factors, order=0) > 0.5
+    from app.image_analysis.wcs_aligner import reproject_frame_to_reference
+    
+    # Perform authentic astrometric WCS reprojection or calibrated fallback
+    align_info = reproject_frame_to_reference(
+        arr1, arr2, ref_meta=meta1, target_meta=meta2, ref_mask=val1, target_mask=val2
+    )
+    arr2 = align_info["aligned_image"]
+    val2 = align_info["aligned_mask"]
         
     joint_valid = val1 & val2 & np.isfinite(arr1) & np.isfinite(arr2)
     n_valid_pixels = int(np.count_nonzero(joint_valid))
@@ -150,9 +153,19 @@ def compute_image_difference(
         "max_negative_residual": round(min_neg_residual, 4),
         "has_significant_change": bool(pos_peaks_count > 4 or neg_peaks_count > 4),
         "provenance_tier": "CALCULATED",
+        "alignment_method": align_info.get("alignment_method", "GEOMETRIC_UNREGISTERED_FALLBACK"),
+        "alignment_status": align_info.get("alignment_status", "GEOMETRIC_UNREGISTERED_APPROXIMATION"),
+        "is_wcs_aligned": bool(align_info.get("is_wcs_aligned", False)),
+        "astrometric_offset_arcsec": align_info.get("astrometric_offset_arcsec", 0.0),
+        "wcs_warnings": align_info.get("warnings", []),
         "explanation": (
             f"Difference analysis reveals {pos_peaks_count} brightened pixels and {neg_peaks_count} "
             f"faded pixels exceeding 3σ significance (noise floor: {sigma_diff:.4f} MJy/sr; "
-            f"flux scale factor S={scale_factor:.4f}; valid pixels: {n_valid_pixels}/{arr1.size})."
+            f"flux scale factor S={scale_factor:.4f}; valid pixels: {n_valid_pixels}/{arr1.size}; "
+            f"alignment: {align_info.get('alignment_method', 'FALLBACK')})."
         )
     }
+
+
+# Convenience alias for tests and modules
+subtract_images = compute_image_difference

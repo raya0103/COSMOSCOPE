@@ -41,11 +41,19 @@ def stack_images(
     aligned_errors = []
     individual_sigmas = []
     
+    from app.image_analysis.wcs_aligner import reproject_frame_to_reference
+
+    ref_meta = metadata[0] if (metadata and len(metadata) > 0) else None
+
     for idx, img in enumerate(images):
         arr = np.nan_to_num(img, nan=0.0).astype(np.float32)
-        if arr.shape != target_shape:
-            z_factors = (target_shape[0] / arr.shape[0], target_shape[1] / arr.shape[1])
-            arr = zoom(arr, z_factors, order=1)
+        tgt_meta = metadata[idx] if (metadata and idx < len(metadata)) else None
+        
+        if idx > 0 and (ref_meta or arr.shape != target_shape):
+            align_res = reproject_frame_to_reference(
+                images[0], arr, ref_meta=ref_meta, target_meta=tgt_meta
+            )
+            arr = align_res["aligned_image"]
         aligned_stack.append(arr)
         
         # Calculate individual noise

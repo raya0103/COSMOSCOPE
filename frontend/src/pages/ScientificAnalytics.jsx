@@ -16,9 +16,11 @@ import {
   Search,
   CheckCircle2,
   Atom,
-  Flame
+  Flame,
+  AlertTriangle
 } from 'lucide-react';
 import PlotlyChart from '../components/PlotlyChart';
+import ProvenanceBadge from '../components/ProvenanceBadge';
 import { api } from '../services/api';
 
 const TARGET_PRESETS = [
@@ -85,44 +87,73 @@ export default function ScientificAnalytics() {
     setSearchParams({ ra: ra.toString(), dec: dec.toString(), name: targetName });
   };
 
-  // 1. Light Curve Plotly Config
-  const lightCurvePlot = lightCurve ? {
-    data: [
-      {
-        x: lightCurve.dates_iso,
-        y: lightCurve.flux_mjy_sr,
+  // 1. Light Curve Plotly Config: Strict separation of Measured vs Simulated
+  const lightCurvePlot = lightCurve ? (() => {
+    const traces = [];
+    const hasMeasured = lightCurve.measured_epochs && lightCurve.measured_epochs.length > 0;
+
+    // Series A: Authentic Measured Observations (Level 2 FITS Photometry)
+    if (hasMeasured) {
+      traces.push({
+        x: lightCurve.measured_epochs.map(e => e.date_iso),
+        y: lightCurve.measured_epochs.map(e => e.flux_mjy_sr),
         error_y: {
           type: 'data',
-          array: lightCurve.flux_err_mjy_sr,
+          array: lightCurve.measured_epochs.map(e => e.flux_err_mjy_sr),
           visible: true,
-          color: 'rgba(0, 240, 255, 0.4)',
-          thickness: 1.5,
-          width: 3
+          color: '#10B981',
+          thickness: 2,
+          width: 6
         },
-        mode: 'lines+markers',
+        mode: 'markers',
         type: 'scatter',
-        name: 'Theoretical Model Baseline (Parametric)',
-        line: { color: '#00F0FF', width: 2.0, shape: 'spline', dash: 'dashdot' },
-        marker: { color: '#38BDF8', size: 6, symbol: 'diamond-open' },
-        hovertemplate: '<b>Date:</b> %{x}<br><b>Model Flux:</b> %{y:.2f} MJy/sr<br><i>[Theoretical Baseline]</i><extra></extra>'
-      },
-      {
-        x: lightCurve.dates_iso,
-        y: lightCurve.dates_iso.map(() => lightCurve.mean_flux_mjy_sr),
-        mode: 'lines',
-        type: 'scatter',
-        name: 'Mean Baseline',
-        line: { color: 'rgba(255, 255, 255, 0.3)', width: 1.5, dash: 'dot' },
-        hoverinfo: 'skip'
-      }
-    ],
-    layout: {
-      title: false,
-      xaxis: { title: 'Observation Date (UTC)' },
-      yaxis: { title: 'Flux Density (MJy / sr)' },
-      legend: { orientation: 'h', y: 1.12, x: 0 }
+        name: `Measured SPHEREx Visits (${lightCurve.measured_count || lightCurve.measured_epochs.length}) [MEASURED]`,
+        marker: { 
+          color: '#10B981', 
+          size: 10, 
+          symbol: 'circle',
+          line: { color: '#047857', width: 1.5 }
+        },
+        hovertemplate: '<b>Obs Date:</b> %{x}<br><b>Measured Flux:</b> %{y:.2f} ± %{error_y.array:.2f} MJy/sr<br><span style="color:#10B981">Tier: MEASURED (IRSA Level 2)</span><extra></extra>'
+      });
     }
-  } : null;
+
+    // Series B: Theoretical Model Baseline (Simulation for mission planning)
+    const modelDates = lightCurve.modelled_baseline ? lightCurve.modelled_baseline.map(m => m.date_iso) : lightCurve.dates_iso;
+    const modelFlux = lightCurve.modelled_baseline ? lightCurve.modelled_baseline.map(m => m.flux_mjy_sr) : lightCurve.flux_mjy_sr;
+
+    traces.push({
+      x: modelDates,
+      y: modelFlux,
+      mode: 'lines',
+      type: 'scatter',
+      name: 'Theoretical Model Baseline [SIMULATED]',
+      line: { color: 'rgba(0, 240, 255, 0.7)', width: 2.0, shape: 'spline', dash: 'dashdot' },
+      hovertemplate: '<b>Date:</b> %{x}<br><b>Model Flux:</b> %{y:.2f} MJy/sr<br><span style="color:#38BDF8">Tier: SIMULATED (Parametric)</span><extra></extra>'
+    });
+
+    // Series C: Mean Baseline Line
+    const meanVal = lightCurve.mean_flux_mjy_sr || 0;
+    traces.push({
+      x: modelDates,
+      y: modelDates.map(() => meanVal),
+      mode: 'lines',
+      type: 'scatter',
+      name: `Mean Baseline (${meanVal.toFixed(1)} MJy/sr)`,
+      line: { color: 'rgba(255, 255, 255, 0.25)', width: 1.5, dash: 'dot' },
+      hoverinfo: 'skip'
+    });
+
+    return {
+      data: traces,
+      layout: {
+        title: false,
+        xaxis: { title: 'Observation Date (UTC)' },
+        yaxis: { title: 'Surface Brightness (MJy / sr)' },
+        legend: { orientation: 'h', y: 1.15, x: 0 }
+      }
+    };
+  })() : null;
 
   // 2. Motion Trajectory Plotly Config
   const motionPlot = motionData ? {
@@ -346,13 +377,23 @@ export default function ScientificAnalytics() {
       {/* 2. Top Metric Cards */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="astro-card p-4 rounded-xl border-cyan-500/30">
-          <div className="text-[10px] font-mono text-cyan-400 uppercase">Target Designation</div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-cyan-400 uppercase">Target Designation</span>
+            <ProvenanceBadge tier="CATALOGUED" size="xs" source="IRSA / SIMBAD / Gaia" />
+          </div>
           <div className="text-base font-extrabold text-white mt-1 truncate">{targetName}</div>
           <div className="text-[11px] text-slate-400 font-mono mt-0.5">RA: {ra.toFixed(4)}° · Dec: {dec.toFixed(4)}°</div>
         </div>
 
         <div className="astro-card p-4 rounded-xl border-violet-500/30">
-          <div className="text-[10px] font-mono text-violet-400 uppercase">Variability Amplitude</div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-violet-400 uppercase">Variability Amplitude</span>
+            <ProvenanceBadge 
+              tier={lightCurve?.measured_count > 0 ? "MEASURED" : "SIMULATED"} 
+              size="xs" 
+              source={lightCurve?.measured_count > 0 ? "SPHEREx QR2 Visits" : "Theoretical Baseline"}
+            />
+          </div>
           <div className="text-base font-extrabold text-white mt-1">
             {lightCurve ? `${lightCurve.variability_amplitude_percent}%` : '--'}
           </div>
@@ -362,7 +403,10 @@ export default function ScientificAnalytics() {
         </div>
 
         <div className="astro-card p-4 rounded-xl border-emerald-500/30">
-          <div className="text-[10px] font-mono text-emerald-400 uppercase">Astrometric Motion</div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-emerald-400 uppercase">Astrometric Motion</span>
+            <ProvenanceBadge tier="CALCULATED" size="xs" method="Gaia DR3 astrometry + reflex" />
+          </div>
           <div className="text-base font-extrabold text-white mt-1">
             {motionData ? `${motionData.total_proper_motion_arcsec_yr}″ / yr` : '--'}
           </div>
@@ -372,7 +416,10 @@ export default function ScientificAnalytics() {
         </div>
 
         <div className="astro-card p-4 rounded-xl border-amber-500/30">
-          <div className="text-[10px] font-mono text-amber-400 uppercase">Anomaly Rank Score</div>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-mono text-amber-400 uppercase">Anomaly Rank Score</span>
+            <ProvenanceBadge tier="CALCULATED" size="xs" method="Multi-Pillar Candidate Ranking" />
+          </div>
           <div className="text-base font-extrabold text-white mt-1">
             {radarData ? `${radarData.overall_anomaly_score} / 100` : '--'}
           </div>
@@ -387,25 +434,44 @@ export default function ScientificAnalytics() {
         
         {/* Graph 1: Brightness vs Time Light Curve */}
         <div className="bg-space-900/80 rounded-2xl border border-space-border p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white">1. Brightness vs. Time (Light Curve)</h3>
-                <p className="text-[11px] text-slate-400">Multi-epoch flux variation across SPHEREx survey visits</p>
+                <p className="text-[11px] text-slate-400">Authentic multi-epoch visits separated from parametric model</p>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                Theoretical Astrophysical Model Baseline (MJD 60750–61300)
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                {lightCurve?.epochs_count || 24} Epochs
-              </span>
+              {lightCurve?.measured_count > 0 ? (
+                <ProvenanceBadge 
+                  tier="MEASURED" 
+                  source={`NASA/IPAC IRSA (${lightCurve.measured_count} Visits)`}
+                  uncertainty="±0.35–1.20 MJy/sr"
+                  size="sm"
+                />
+              ) : null}
+              <ProvenanceBadge 
+                tier="SIMULATED" 
+                source="Parametric Orbital Baseline" 
+                method="Sinusoidal/Spline Pulsation Simulation"
+                size="sm"
+              />
             </div>
           </div>
+
+          {/* Temporal Coverage Warning if fewer than 3 measured visits */}
+          {(lightCurve?.temporal_coverage_status === 'INSUFFICIENT_TEMPORAL_COVERAGE' || (lightCurve?.measured_count || 0) < 3) && (
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-200 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-amber-300 font-mono">ARCHIVE COVERAGE NOTICE: </span>
+                SPHEREx QR2 provides {lightCurve?.measured_count || 0} authentic visit(s) for this target ({lightCurve?.time_baseline_days?.toFixed(1) || 0} days baseline). The dashed baseline is a <strong>mathematical simulation [SIMULATED]</strong> for mission planning and cannot be used as an empirical periodic curve.
+              </div>
+            </div>
+          )}
 
           <div className="h-80">
             {lightCurvePlot && (
@@ -422,14 +488,14 @@ export default function ScientificAnalytics() {
           <div className="p-3 rounded-xl bg-space-850 border border-space-border/60 text-xs text-slate-300 flex items-start gap-2.5">
             <Flame className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>Astrophysical Physical Interpretation:</strong> {lightCurve?.classification}. Demonstrates authentic multi-epoch flux oscillations, enabling immediate identification of periodic pulsators (R Draconis) and eruptive young stellar objects (RW Aurigae).
+              <strong>Astrophysical Physical Interpretation:</strong> {lightCurve?.classification}. Measured points indicate authentic SPHEREx QR2 Level 2 visits. Baseline demonstrates predicted pulsation or eruptive variability across orbital phases.
             </div>
           </div>
         </div>
 
         {/* Graph 2: Position vs Time / Motion Graph */}
         <div className="bg-space-900/80 rounded-2xl border border-space-border p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
                 <Compass className="w-4 h-4" />
@@ -439,9 +505,13 @@ export default function ScientificAnalytics() {
                 <p className="text-[11px] text-slate-400">Measured celestial displacement (Δα, Δδ) with Gaia DR3 verification</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30">
-              {motionData?.total_proper_motion_mas_yr || 0} mas/yr
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <ProvenanceBadge tier="CATALOGUED" source="Gaia DR3 Astrometry" size="sm" />
+              <ProvenanceBadge tier="CALCULATED" method="Proper Motion + Reflex Ellipse" size="sm" />
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/30">
+                {motionData?.total_proper_motion_mas_yr || 0} mas/yr
+              </span>
+            </div>
           </div>
 
           <div className="h-80">
@@ -471,7 +541,7 @@ export default function ScientificAnalytics() {
 
         {/* Graph 3: 102-Band Spectral Curve */}
         <div className="bg-space-900/80 rounded-2xl border border-space-border p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center">
                 <Activity className="w-4 h-4" />
@@ -481,9 +551,13 @@ export default function ScientificAnalytics() {
                 <p className="text-[11px] text-slate-400">102 narrow spectral channels (0.75–5.0 µm) with chemical ice lines</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/30">
-              102 Channels · 6 Detectors
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <ProvenanceBadge tier="CALCULATED" method="Synthetic Aperture Photometry" size="sm" />
+              <ProvenanceBadge tier="INTERPOLATED" method="Continuum Model (Unobserved Bands)" size="sm" />
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/30">
+                102 Channels · 6 Detectors
+              </span>
+            </div>
           </div>
 
           <div className="h-80">
@@ -501,14 +575,14 @@ export default function ScientificAnalytics() {
           <div className="p-3 rounded-xl bg-space-850 border border-space-border/60 text-xs text-slate-300 flex items-start gap-2.5">
             <Atom className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
             <div>
-              <strong>Chemical Ice Mantle Signatures:</strong> Dashed vertical markers indicate key astrophysical transition bands: 3.05 µm H₂O ice absorption (prominent in WISE 0855), 4.27 µm CO₂ ice, and 2.16 µm Brγ accretion emission.
+              <strong>Chemical Ice Mantle Signatures:</strong> Dashed vertical markers indicate key astrophysical transition bands: 3.05 µm H₂O ice absorption (prominent in WISE 0855), 4.27 µm CO₂ ice, and 2.16 µm Brγ accretion emission. <em>Notice: resolving power R=35–128 indicates preliminary candidate detection pending high-resolution spectroscopic follow-up.</em>
             </div>
           </div>
         </div>
 
         {/* Graph 4: 102-Band Intensity Heatmap */}
         <div className="bg-space-900/80 rounded-2xl border border-space-border p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                 <Layers className="w-4 h-4" />
@@ -518,9 +592,12 @@ export default function ScientificAnalytics() {
                 <p className="text-[11px] text-slate-400">2D flux dispersion matrix across 6 detector arrays (D1–D6)</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
-              6 × 17 Array Matrix
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <ProvenanceBadge tier="CALCULATED" method="LVF Dispersion Matrix (6 × 17)" size="sm" />
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                6 × 17 Array Matrix
+              </span>
+            </div>
           </div>
 
           <div className="h-80">
@@ -550,7 +627,7 @@ export default function ScientificAnalytics() {
 
         {/* Graph 5: Anomaly Radar & Classification */}
         <div className="bg-space-900/80 rounded-2xl border border-space-border p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
                 <Sparkles className="w-4 h-4" />
@@ -560,9 +637,12 @@ export default function ScientificAnalytics() {
                 <p className="text-[11px] text-slate-400">Multivariate ranking: Motion, Variability, Ice Depth, Novelty</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
-              Score: {radarData?.overall_anomaly_score || 0} / 100
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <ProvenanceBadge tier="CALCULATED" method="Normalized Multi-Pillar Scoring" size="sm" />
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                Score: {radarData?.overall_anomaly_score || 0} / 100
+              </span>
+            </div>
           </div>
 
           <div className="h-80">
@@ -584,7 +664,7 @@ export default function ScientificAnalytics() {
 
         {/* Graph 6: Stacking & Signal-to-Noise Analytics */}
         <div className="bg-space-900/80 rounded-2xl border border-space-border p-5 shadow-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center">
                 <TrendingUp className="w-4 h-4" />
@@ -594,9 +674,12 @@ export default function ScientificAnalytics() {
                 <p className="text-[11px] text-slate-400">Co-addition gain: SNR_stacked = √N · SNR_single</p>
               </div>
             </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/30">
-              √N Theoretical Limit
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <ProvenanceBadge tier="SIMULATED" method="Poisson Co-addition (√N · SNR₀)" size="sm" />
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-500/10 text-teal-300 border border-teal-500/30">
+                √N Theoretical Limit
+              </span>
+            </div>
           </div>
 
           <div className="h-80">

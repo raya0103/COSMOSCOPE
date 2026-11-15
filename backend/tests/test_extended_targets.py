@@ -3,6 +3,11 @@ Unit and integration tests for COSMOSCOPE Extended Astronomical Catalog.
 Verifies the preservation of the 5 challenge targets and authentic properties
 of the 15 newly discovered celestial objects.
 """
+import os
+import sys
+sys.path.insert(0, os.path.abspath("backend"))
+sys.path.insert(0, os.path.abspath("."))
+
 import pytest
 from fastapi.testclient import TestClient
 from app.main import app

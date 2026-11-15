@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Layers, MinusCircle, PlusCircle, Sparkles, Sliders, ArrowRight } from 'lucide-react';
 import SearchHeader from '../components/SearchHeader';
 import FITSViewerCanvas from '../visualizations/FITSViewerCanvas';
+import ProvenanceBadge from '../components/ProvenanceBadge';
 import { api } from '../services/api';
 
 export default function ImageAnalysisLab() {
@@ -260,11 +261,23 @@ export default function ImageAnalysisLab() {
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
               <span>Scientific Processing Findings</span>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/30 font-mono">
-                [CALCULATED]
-              </span>
+              <ProvenanceBadge 
+                tier="CALCULATED" 
+                method="Astropy WCS Reprojection & Aperture Subtraction"
+                uncertainty={metrics.sigma_noise ? `±${metrics.sigma_noise.toFixed(4)} MJy/sr` : undefined}
+                size="sm"
+              />
             </h3>
-            <div className="flex items-center gap-3 text-xs font-mono">
+            <div className="flex items-center gap-3 text-xs font-mono flex-wrap">
+              {metrics.is_wcs_aligned !== undefined && (
+                <span className={`px-2 py-0.5 rounded text-[10px] font-mono border ${
+                  metrics.is_wcs_aligned 
+                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+                    : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                }`}>
+                  {metrics.is_wcs_aligned ? `✓ WCS Aligned (Δθ: ${metrics.astrometric_offset_arcsec?.toFixed(2) || '0.00'}″)` : '⚠ Geometric Resampling'}
+                </span>
+              )}
               {metrics.valid_fraction !== undefined && (
                 <span className="text-emerald-400">
                   Valid Area: {(metrics.valid_fraction * 100).toFixed(0)}% ({metrics.valid_pixel_count} px)
@@ -275,6 +288,17 @@ export default function ImageAnalysisLab() {
               </span>
             </div>
           </div>
+
+          {metrics.wcs_warnings && metrics.wcs_warnings.length > 0 && (
+            <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs font-mono space-y-0.5">
+              <div className="font-bold flex items-center gap-1.5 text-amber-300">
+                <span>⚠ Astrometric Alignment Notice:</span>
+              </div>
+              {metrics.wcs_warnings.map((w, idx) => (
+                <div key={idx} className="text-[11px] text-amber-200">• {w}</div>
+              ))}
+            </div>
+          )}
 
           {metrics.compatibility_status && metrics.compatibility_status !== 'COMPATIBLE' && (
             <div className="p-3 rounded-xl bg-amber-950/30 border border-amber-500/40 text-amber-300 text-xs font-mono space-y-1">

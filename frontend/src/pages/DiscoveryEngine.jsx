@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Sparkles, ShieldAlert, Award, FileCheck2, ArrowRight, Activity, Clock, BarChart3 } from 'lucide-react';
 import SearchHeader from '../components/SearchHeader';
 import PlotlyChart from '../components/PlotlyChart';
+import ProvenanceBadge from '../components/ProvenanceBadge';
 import { api } from '../services/api';
 
 export default function DiscoveryEngine() {
@@ -75,8 +76,13 @@ export default function DiscoveryEngine() {
                     {anomalyData?.badge || "Evaluating Anomaly..."}
                   </span>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30">
-                    Candidate Anomaly — Not a Confirmed Discovery
+                    Candidate Triage Index — Exploratory Ranking
                   </span>
+                  <ProvenanceBadge 
+                    tier="CALCULATED" 
+                    method="Normalized 4-Pillar Metric Scoring"
+                    size="xs"
+                  />
                 </div>
                 <h2 className="text-2xl font-bold text-white mt-2">
                   {currentTarget.name}
