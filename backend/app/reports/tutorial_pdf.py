@@ -1,8 +1,8 @@
 """
 COSMOSCOPE Complete Interactive User Guide & Scientific Tutorial PDF Generator.
-Produces a comprehensive, publication-grade A4 tutorial PDF using ReportLab Platypus.
-Covers all 16 chapters detailing platform architecture, scientific workflows,
-dashboard modules, and data provenance.
+Produces a comprehensive, publication-grade A4 user manual PDF using ReportLab Platypus.
+Covers all 16 chapters detailing platform architecture, dashboard modules, controls,
+workflows, screenshots, and 6-tier data provenance.
 """
 
 import io
@@ -20,7 +20,8 @@ from reportlab.platypus import (
     TableStyle,
     PageBreak,
     KeepTogether,
-    HRFlowable
+    HRFlowable,
+    Image as ReportLabImage
 )
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
@@ -59,7 +60,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setFillColor(colors.HexColor("#091124"))
 
         # Running Header
-        self.drawString(36, page_h - 26, "COSMOSCOPE — Explore the Changing Universe")
+        self.drawString(36, page_h - 26, "COSMOSCOPE - Explore the Changing Universe")
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#64748b"))
         self.drawRightString(page_w - 36, page_h - 26, "Complete Platform User Guide & Tutorial")
@@ -77,7 +78,7 @@ class NumberedCanvas(canvas.Canvas):
         # Running Footer
         self.setFont("Helvetica", 8)
         self.setFillColor(colors.HexColor("#64748b"))
-        self.drawString(36, 20, "NASA Space Apps Challenge · SPHEREx Scientific Exploration Platform · Open Science")
+        self.drawString(36, 20, "NASA Space Apps Challenge - SPHEREx Scientific Exploration Platform - Open Science")
         
         page_str = f"Page {self._pageNumber} of {page_count}"
         self.drawRightString(page_w - 36, 20, page_str)
@@ -92,8 +93,8 @@ def get_tutorial_styles():
         "CoverTitle",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=32,
-        leading=38,
+        fontSize=30,
+        leading=36,
         textColor=colors.HexColor("#F5F8FF"),
         alignment=TA_CENTER
     )
@@ -102,8 +103,8 @@ def get_tutorial_styles():
         "CoverSubtitle",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=15,
-        leading=20,
+        fontSize=14,
+        leading=19,
         textColor=colors.HexColor("#36DDF5"),
         alignment=TA_CENTER
     )
@@ -112,7 +113,7 @@ def get_tutorial_styles():
         "CoverTagline",
         parent=styles["Normal"],
         fontName="Helvetica",
-        fontSize=10,
+        fontSize=9.5,
         leading=14,
         textColor=colors.HexColor("#C4D0E0"),
         alignment=TA_CENTER
@@ -122,11 +123,11 @@ def get_tutorial_styles():
         "ChapterH1",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=16,
-        leading=20,
+        fontSize=14,
+        leading=18,
         textColor=colors.HexColor("#091124"),
-        spaceBefore=12,
-        spaceAfter=6,
+        spaceBefore=8,
+        spaceAfter=4,
         keepWithNext=True
     )
 
@@ -134,11 +135,11 @@ def get_tutorial_styles():
         "SectionH2",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=11,
-        leading=15,
+        fontSize=10,
+        leading=13.5,
         textColor=colors.HexColor("#0369a1"),
-        spaceBefore=8,
-        spaceAfter=4,
+        spaceBefore=6,
+        spaceAfter=3,
         keepWithNext=True
     )
 
@@ -146,11 +147,11 @@ def get_tutorial_styles():
         "TutorialBody",
         parent=styles["Normal"],
         fontName="Helvetica",
-        fontSize=9,
-        leading=13,
+        fontSize=8.5,
+        leading=12,
         textColor=colors.HexColor("#1e293b"),
         alignment=TA_LEFT,
-        spaceAfter=5
+        spaceAfter=3.5
     )
 
     body_bold = ParagraphStyle(
@@ -164,14 +165,14 @@ def get_tutorial_styles():
         parent=body,
         leftIndent=12,
         firstLineIndent=-8,
-        spaceAfter=3
+        spaceAfter=2
     )
 
     callout_text = ParagraphStyle(
         "CalloutText",
         parent=body,
-        fontSize=8.5,
-        leading=12,
+        fontSize=8,
+        leading=11,
         textColor=colors.HexColor("#0f172a")
     )
 
@@ -179,8 +180,8 @@ def get_tutorial_styles():
         "CodeText",
         parent=body,
         fontName="Courier",
-        fontSize=8,
-        leading=11,
+        fontSize=7.5,
+        leading=10,
         textColor=colors.HexColor("#0284c7")
     )
 
@@ -188,8 +189,8 @@ def get_tutorial_styles():
         "TableHeader",
         parent=styles["Normal"],
         fontName="Helvetica-Bold",
-        fontSize=8.5,
-        leading=11,
+        fontSize=8,
+        leading=10.5,
         textColor=colors.HexColor("#ffffff"),
         alignment=TA_CENTER
     )
@@ -198,8 +199,8 @@ def get_tutorial_styles():
         "TableCell",
         parent=styles["Normal"],
         fontName="Helvetica",
-        fontSize=8,
-        leading=11,
+        fontSize=7.8,
+        leading=10.5,
         textColor=colors.HexColor("#1e293b")
     )
 
@@ -208,6 +209,18 @@ def get_tutorial_styles():
         parent=table_cell,
         fontName="Helvetica-Bold",
         textColor=colors.HexColor("#091124")
+    )
+
+    image_caption = ParagraphStyle(
+        "ImageCaption",
+        parent=styles["Normal"],
+        fontName="Helvetica-Oblique",
+        fontSize=7.5,
+        leading=10,
+        textColor=colors.HexColor("#64748b"),
+        alignment=TA_CENTER,
+        spaceBefore=3,
+        spaceAfter=6
     )
 
     return {
@@ -224,6 +237,7 @@ def get_tutorial_styles():
         "table_header": table_header,
         "table_cell": table_cell,
         "table_cell_bold": table_cell_bold,
+        "image_caption": image_caption
     }
 
 
@@ -239,10 +253,10 @@ def make_callout(text: str, styles: dict, title: str = "SCIENTIFIC NOTE", color_
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
         ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#cbd5e1")),
         ('LINELEFT', (0, 0), (0, -1), 3.5, colors.HexColor(color_hex)),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING', (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 4.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4.5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 9),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 9),
     ]))
     return t
 
@@ -266,27 +280,31 @@ def generate_tutorial_pdf() -> bytes:
     styles = get_tutorial_styles()
     story = []
 
+    # Locate assets directory
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    assets_dir = os.path.join(base_dir, "assets")
+
     # =========================================================================
-    # COVER PAGE
+    # PAGE 1: DEDICATED COVER PAGE
     # =========================================================================
     cover_data = [
         [
             Paragraph("COSMOSCOPE", styles["title_cover"])
         ],
         [
-            Spacer(1, 8)
+            Spacer(1, 6)
         ],
         [
             Paragraph("EXPLORE THE CHANGING UNIVERSE", styles["subtitle_cover"])
         ],
         [
-            Spacer(1, 6)
+            Spacer(1, 5)
         ],
         [
-            Paragraph("Complete Platform User Guide & Scientific Tutorial · Official Manual", styles["tagline_cover"])
+            Paragraph("Complete Website User Manual & Scientific Tutorial Guide", styles["tagline_cover"])
         ],
         [
-            Spacer(1, 14)
+            Spacer(1, 10)
         ],
         [
             Paragraph(
@@ -302,14 +320,14 @@ def generate_tutorial_pdf() -> bytes:
     cover_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#071225")),
         ('BOX', (0, 0), (-1, -1), 1.5, colors.HexColor("#0284c7")),
-        ('TOPPADDING', (0, 0), (-1, -1), 24),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 24),
-        ('LEFTPADDING', (0, 0), (-1, -1), 20),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+        ('TOPPADDING', (0, 0), (-1, -1), 22),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 22),
+        ('LEFTPADDING', (0, 0), (-1, -1), 18),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 18),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
     ]))
     story.append(cover_table)
-    story.append(Spacer(1, 20))
+    story.append(Spacer(1, 18))
 
     # Metadata Card on Cover
     meta_rows = [
@@ -317,12 +335,12 @@ def generate_tutorial_pdf() -> bytes:
             Paragraph("<b>Document Version:</b>", styles["table_cell_bold"]),
             Paragraph("v2.2.0 (Scientific Validation Release)", styles["table_cell"]),
             Paragraph("<b>Target Mission:</b>", styles["table_cell_bold"]),
-            Paragraph("NASA SPHEREx (0.75 – 5.0 µm)", styles["table_cell"]),
+            Paragraph("NASA SPHEREx (0.75 - 5.0 microns)", styles["table_cell"]),
         ],
         [
             Paragraph("<b>Publication Date:</b>", styles["table_cell_bold"]),
             Paragraph(time.strftime("%B %Y"), styles["table_cell"]),
-            Paragraph("<b>Event / Track:</b>", styles["table_cell_bold"]),
+            Paragraph("<b>Track / Project:</b>", styles["table_cell_bold"]),
             Paragraph("NASA Space Apps Challenge", styles["table_cell"]),
         ],
         [
@@ -337,45 +355,60 @@ def generate_tutorial_pdf() -> bytes:
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#f1f5f9")),
         ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor("#cbd5e1")),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
     ]))
     story.append(meta_table)
-    story.append(Spacer(1, 20))
+    story.append(Spacer(1, 18))
 
     # Executive Overview
     story.append(Paragraph(
-        "<b>Welcome to COSMOSCOPE.</b> This manual serves as an end-to-end tutorial to mastering the COSMOSCOPE "
+        "<b>Welcome to COSMOSCOPE.</b> This manual serves as an end-to-end tutorial for mastering the COSMOSCOPE "
         "exploration environment. Whether you are inspecting the high-velocity proper motion of Barnard's Star, "
         "searching for water-ice absorption bands in brown dwarf WISE 0855, or validating automated change-detection "
-        "candidates, every chapter below explains the buttons, mathematical methods, and workflows available in the platform.",
+        "candidates, every chapter explains the buttons, scientific methods, and workflows available in the platform.",
         styles["body"]
     ))
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 12))
 
-    # TABLE OF CONTENTS
+    story.append(make_callout(
+        "COSMOSCOPE connects to public NASA/IPAC Infrared Science Archive (IRSA) repositories and provides "
+        "responsive client-side caching to ensure smooth exploration and fast data access across observation sessions.",
+        styles,
+        title="DATA ARCHITECTURE PRINCIPLE"
+    ))
+
+    # Page break after Cover Page
+    story.append(PageBreak())
+
+    # =========================================================================
+    # PAGE 2: TABLE OF CONTENTS
+    # =========================================================================
+    story.append(Paragraph("TABLE OF CONTENTS", styles["chapter_h1"]))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor("#0284c7"), spaceAfter=10))
+
     toc_data = [
-        [Paragraph("TABLE OF CONTENTS", styles["table_header"]), Paragraph("PRIMARY TOPIC", styles["table_header"])],
-        [Paragraph("Chapter 1: Introduction to COSMOSCOPE", styles["table_cell_bold"]), Paragraph("Mission context, scientific problem, and core purpose", styles["table_cell"])],
-        [Paragraph("Chapter 2: Understanding the Homepage", styles["table_cell_bold"]), Paragraph("Landing page layout, sections, navigation, and entry points", styles["table_cell"])],
-        [Paragraph("Chapter 3: Dashboard Overview", styles["table_cell_bold"]), Paragraph("The 9 scientific workbench modules and workflow architecture", styles["table_cell"])],
-        [Paragraph("Chapter 4: Sky Explorer", styles["table_cell_bold"]), Paragraph("Object targeting, coordinate search, all-sky maps, and FOV cutouts", styles["table_cell"])],
-        [Paragraph("Chapter 5: Cosmic Time Machine", styles["table_cell_bold"]), Paragraph("Multi-epoch player, playback speed, blinking, and comparison modes", styles["table_cell"])],
-        [Paragraph("Chapter 6: Spectral Lab", styles["table_cell_bold"]), Paragraph("102-band spectrophotometry, ice indicators, and reading SED graphs", styles["table_cell"])],
-        [Paragraph("Chapter 7: Image Analysis Lab", styles["table_cell_bold"]), Paragraph("FITS rendering, stretches, image subtraction, stacking, and photometry", styles["table_cell"])],
-        [Paragraph("Chapter 8: Discovery Engine", styles["table_cell_bold"]), Paragraph("Automated change detection, candidate triage, and exploratory caution", styles["table_cell"])],
-        [Paragraph("Chapter 9: Multi-Mission Explorer", styles["table_cell_bold"]), Paragraph("Cross-matching SPHEREx with ESA Gaia DR3, NASA AllWISE, and 2MASS", styles["table_cell"])],
+        [Paragraph("CHAPTER", styles["table_header"]), Paragraph("PRIMARY TOPIC & SCIENTIFIC COVERAGE", styles["table_header"])],
+        [Paragraph("Chapter 1: Introduction to COSMOSCOPE", styles["table_cell_bold"]), Paragraph("Mission context, scientific problem, infrared advantages, and core architecture", styles["table_cell"])],
+        [Paragraph("Chapter 2: Understanding the Homepage", styles["table_cell_bold"]), Paragraph("Landing page layout, sections, navigation, research targets, and data notices", styles["table_cell"])],
+        [Paragraph("Chapter 3: Dashboard Overview", styles["table_cell_bold"]), Paragraph("The 9 scientific workbench modules and unified workflow architecture", styles["table_cell"])],
+        [Paragraph("Chapter 4: Sky Explorer", styles["table_cell_bold"]), Paragraph("Object targeting, coordinate search, all-sky maps, survey layers, and FOV cutouts", styles["table_cell"])],
+        [Paragraph("Chapter 5: Cosmic Time Machine", styles["table_cell_bold"]), Paragraph("Multi-epoch player, playback speed, variable blinking, and 5 comparison modes", styles["table_cell"])],
+        [Paragraph("Chapter 6: Spectral Lab", styles["table_cell_bold"]), Paragraph("102-band spectrophotometry, ice indicators (H2O, CO2, CO), and reading SED graphs", styles["table_cell"])],
+        [Paragraph("Chapter 7: Image Analysis Lab", styles["table_cell_bold"]), Paragraph("FITS rendering, stretches, colormaps, image subtraction, and aperture photometry", styles["table_cell"])],
+        [Paragraph("Chapter 8: Discovery Engine", styles["table_cell_bold"]), Paragraph("Automated change detection, candidate triage queue, and exploratory caution", styles["table_cell"])],
+        [Paragraph("Chapter 9: Multi-Mission Explorer", styles["table_cell_bold"]), Paragraph("Cross-matching SPHEREx with ESA Gaia DR3, NASA AllWISE, and 2MASS archives", styles["table_cell"])],
         [Paragraph("Chapter 10: Research Library", styles["table_cell_bold"]), Paragraph("Scientific references, mission white papers, and interactive glossaries", styles["table_cell"])],
         [Paragraph("Chapter 11: Scientific Evidence Dossier", styles["table_cell_bold"]), Paragraph("6-tier provenance system, SHA-256 seal, and audit report generation", styles["table_cell"])],
         [Paragraph("Chapter 12: Scientific Analytics", styles["table_cell_bold"]), Paragraph("Statistical radar charts, flux variance, and variability diagnostics", styles["table_cell"])],
         [Paragraph("Chapter 13: Understanding Astronomical Data", styles["table_cell_bold"]), Paragraph("Comprehensive beginner-friendly glossary of astrophysical terms", styles["table_cell"])],
-        [Paragraph("Chapter 14: Data Sources & Reliability", styles["table_cell_bold"]), Paragraph("NASA/IPAC IRSA archives, pipelines, and model vs measured transparency", styles["table_cell"])],
-        [Paragraph("Chapter 15: Frequently Asked Questions", styles["table_cell_bold"]), Paragraph("Concise answers to common user, mission, and data questions", styles["table_cell"])],
+        [Paragraph("Chapter 14: Data Sources & Reliability", styles["table_cell_bold"]), Paragraph("NASA/IPAC IRSA archives, pipelines, and curated data scope transparency", styles["table_cell"])],
+        [Paragraph("Chapter 15: Frequently Asked Questions", styles["table_cell_bold"]), Paragraph("Concise answers to common user, mission, export, and data questions", styles["table_cell"])],
         [Paragraph("Chapter 16: Quick Start Guide", styles["table_cell_bold"]), Paragraph("10-step practical walkthrough: Your First 10 Minutes with COSMOSCOPE", styles["table_cell"])],
     ]
-    toc_table = Table(toc_data, colWidths=[200, 320])
+    toc_table = Table(toc_data, colWidths=[185, 335])
     toc_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#091124")),
         ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor("#0284c7")),
@@ -386,13 +419,22 @@ def generate_tutorial_pdf() -> bytes:
         ('RIGHTPADDING', (0, 0), (-1, -1), 6),
     ]))
     story.append(toc_table)
+    story.append(Spacer(1, 14))
 
+    story.append(make_callout(
+        "COSMOSCOPE is an open-science platform designed for the NASA Space Apps Challenge. "
+        "Every feature documented in this user guide is interactive and available for exploration.",
+        styles,
+        title="DOCUMENT CONTEXT & OPEN SCIENCE"
+    ))
+
+    # Page break after Table of Contents
     story.append(PageBreak())
 
     # =========================================================================
-    # CHAPTER 1 — INTRODUCTION TO COSMOSCOPE
+    # CHAPTER 1  -  INTRODUCTION TO COSMOSCOPE
     # =========================================================================
-    story.append(Paragraph("Chapter 1 — Introduction to COSMOSCOPE", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 1: Introduction to COSMOSCOPE", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
@@ -416,31 +458,25 @@ def generate_tutorial_pdf() -> bytes:
         "SPHEREx (<i>Spectro-Photometer for the History of the Universe, Epoch of Reionization and Ices Explorer</i>) "
         "is a NASA Medium-Class Explorer (MIDEX) mission designed to conduct the first-ever all-sky near-infrared "
         "spectrophotometric survey. Operating in a 650 km Sun-synchronous low-Earth polar orbit, SPHEREx maps the "
-        "entire celestial sphere every 6 months across <b>102 narrow spectral bands</b> from <b>0.75 µm to 5.0 µm</b>.",
+        "entire celestial sphere every 6 months across <b>102 narrow spectral bands</b> from <b>0.75 microns to 5.0 microns</b>.",
         styles["body"]
     ))
     story.append(Paragraph(
         "<b>1.4 Why Are Infrared Observations Important?</b><br/>"
-        "• <b>Piercing Interstellar Dust:</b> Cosmic dust clouds absorb and scatter visible light, hiding young stars "
+        "&bull; <b>Piercing Interstellar Dust:</b> Cosmic dust clouds absorb and scatter visible light, hiding young stars "
         "and galactic centers. Longer infrared wavelengths glide straight through dust grains.<br/>"
-        "• <b>Detecting Cold Matter:</b> Low-mass brown dwarfs, planetary atmospheres, and interstellar ices radiate "
+        "&bull; <b>Detecting Cold Matter:</b> Low-mass brown dwarfs, planetary atmospheres, and interstellar ices radiate "
         "thermal energy almost exclusively in the infrared.<br/>"
-        "• <b>Cosmic Redshift:</b> Light emitted by infant galaxies in the early universe has been stretched into "
+        "&bull; <b>Cosmic Redshift:</b> Light emitted by infant galaxies in the early universe has been stretched into "
         "infrared bands by the cosmic expansion of space over billions of years.",
         styles["body"]
     ))
-    story.append(make_callout(
-        "COSMOSCOPE connects directly to the NASA/IPAC Infrared Science Archive (IRSA) and incorporates an "
-        "offline-resilient caching architecture to guarantee 100% operational reliability during evaluations.",
-        styles,
-        title="CORE ARCHITECTURE PRINCIPLE"
-    ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 2 — UNDERSTANDING THE HOMEPAGE
+    # CHAPTER 2  -  UNDERSTANDING THE HOMEPAGE
     # =========================================================================
-    story.append(Paragraph("Chapter 2 — Understanding the Homepage", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 2: Understanding the Homepage", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
@@ -449,96 +485,99 @@ def generate_tutorial_pdf() -> bytes:
         styles["body"]
     ))
     story.append(Paragraph(
-        "• <b>Navigation Bar:</b> Fixed at the top with quick links to <i>About</i>, <i>Science</i>, <i>How It Works</i>, "
+        "&bull; <b>Navigation Bar:</b> Fixed at the top with quick links to <i>About</i>, <i>Science</i>, <i>How It Works</i>, "
         "<i>Tutorial Guide</i>, <i>Discoveries</i>, <i>Data Sources</i>, <i>FAQ</i>, the Dark/Light theme toggle, and the "
         "primary <b>Explore Dashboard</b> launch button.<br/>"
-        "• <b>Hero Section:</b> Displays live telescope telemetry metrics (102 Spectral Bands, 0.75–5.0 µm, 6 Linear Variable "
+        "&bull; <b>Hero Section:</b> Displays live telescope telemetry metrics (102 Spectral Bands, 0.75-5.0 microns, 6 Linear Variable "
         "Filter Detectors, and 3,885+ Observation Cutouts), with instant search by object name or coordinates.<br/>"
-        "• <b>Why Observing the Changing Universe Matters:</b> Explains temporal astrophysics, stellar variability, and orbital mechanics.<br/>"
-        "• <b>How It Works (Three Stages):</b> Outlines the 3-step pipeline: <i>01 — EXPLORE</i> (archive data ingestion), "
-        "<i>02 — ANALYZE</i> (photometry & spectroscopy), and <i>03 — DISCOVER</i> (anomaly detection). Immediately below sits the "
+        "&bull; <b>Why Observing the Changing Universe Matters:</b> Explains temporal astrophysics, stellar variability, and orbital mechanics.<br/>"
+        "&bull; <b>How It Works (Three Stages):</b> Outlines the 3-step pipeline: <i>01 - EXPLORE</i> (archive data ingestion), "
+        "<i>02 - ANALYZE</i> (photometry & spectroscopy), and <i>03 - DISCOVER</i> (anomaly detection). Immediately below sits the "
         "<b>Tutorial Guide</b> section with direct PDF downloads.<br/>"
-        "• <b>Five Verified Research Targets:</b> Interactive tabbed dossiers showcasing Barnard's Star, Epsilon Indi B, WISE 0855, "
+        "&bull; <b>Five Verified Research Targets:</b> Interactive tabbed dossiers showcasing Barnard's Star, Epsilon Indi B, WISE 0855, "
         "RW Aurigae, and R Draconis.<br/>"
-        "• <b>Interactive FAQ:</b> 28 categorized accordion questions with keyword search.<br/>"
-        "• <b>Footer:</b> Contains external NASA IRSA, ESA Gaia, and GitHub project references.",
+        "&bull; <b>Data Sources & Scientific Transparency:</b> Detailed explanation of data origin (NASA/IPAC IRSA, Gaia DR3, AllWISE) "
+        "and the 5 Transparency Tiers alongside the Scientific Data Scope Notice.<br/>"
+        "&bull; <b>Interactive FAQ:</b> 27 categorized accordion questions with keyword search.<br/>"
+        "&bull; <b>Footer:</b> Contains external NASA IRSA, ESA Gaia, and GitHub project references.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 3 — DASHBOARD OVERVIEW
+    # CHAPTER 3  -  DASHBOARD OVERVIEW
     # =========================================================================
-    story.append(Paragraph("Chapter 3 — Dashboard Overview & Scientific Workbench", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 3: Dashboard Overview & Scientific Workbench", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "Access the dashboard by clicking <b>'Explore Dashboard'</b> in the top navigation bar or visiting "
-        "<code>/explorer</code>. The dashboard provides nine specialized environments:",
+        "<code>/explorer</code>. The dashboard provides nine specialized environments in the following order:",
         styles["body"]
     ))
 
     dash_modules = [
         [Paragraph("MODULE", styles["table_header"]), Paragraph("ROUTE", styles["table_header"]), Paragraph("CORE CAPABILITIES", styles["table_header"])],
-        [Paragraph("Sky Explorer", styles["table_cell_bold"]), Paragraph("/explorer", styles["code_text"]), Paragraph("Pan/zoom all-sky galaxy map, search targets by RA/Dec, load authentic SPHEREx FITS cutouts.", styles["table_cell"])],
-        [Paragraph("Cosmic Time Machine", styles["table_cell_bold"]), Paragraph("/time-machine", styles["code_text"]), Paragraph("Play multi-epoch time-lapses, variable-rate blinking, split-screen comparison, and image subtraction.", styles["table_cell"])],
-        [Paragraph("Spectral Lab", styles["table_cell_bold"]), Paragraph("/spectral-lab", styles["code_text"]), Paragraph("102-channel spectrophotometry, diagnostic ice absorption markers (H2O, CO2, CO, CH4).", styles["table_cell"])],
-        [Paragraph("Image Analysis Lab", styles["table_cell_bold"]), Paragraph("/image-lab", styles["code_text"]), Paragraph("FITS contrast stretches (Log, Asinh, ZScale), flux-matched subtraction, aperture photometry.", styles["table_cell"])],
-        [Paragraph("Discovery Engine", styles["table_cell_bold"]), Paragraph("/discovery", styles["code_text"]), Paragraph("Automated change-detection pipeline flagging moving objects, variables, and detector artifacts.", styles["table_cell"])],
-        [Paragraph("Scientific Analytics", styles["table_cell_bold"]), Paragraph("/analytics", styles["code_text"]), Paragraph("Multi-Parameter Anomaly Radar charts, flux distributions, and variability statistics.", styles["table_cell"])],
-        [Paragraph("Multi-Mission Explorer", styles["table_cell_bold"]), Paragraph("/multi-mission", styles["code_text"]), Paragraph("Cross-match SPHEREx sources with ESA Gaia DR3 astrometry and NASA AllWISE mid-IR colors.", styles["table_cell"])],
-        [Paragraph("Research Library", styles["table_cell_bold"]), Paragraph("/research", styles["code_text"]), Paragraph("Curated peer-reviewed publications, instrument specifications, and interactive glossaries.", styles["table_cell"])],
-        [Paragraph("Evidence Dossier", styles["table_cell_bold"]), Paragraph("/dossier", styles["code_text"]), Paragraph("Comprehensive target synthesis, 6-tier provenance system, SHA-256 seal, and PDF reports.", styles["table_cell"])],
+        [Paragraph("1. Sky Explorer", styles["table_cell_bold"]), Paragraph("/explorer", styles["code_text"]), Paragraph("Pan/zoom all-sky galaxy map, search targets by RA/Dec, load authentic SPHEREx FITS cutouts.", styles["table_cell"])],
+        [Paragraph("2. Cosmic Time Machine", styles["table_cell_bold"]), Paragraph("/time-machine", styles["code_text"]), Paragraph("Play multi-epoch time-lapses, variable-rate blinking, split-screen comparison, and image subtraction.", styles["table_cell"])],
+        [Paragraph("3. Spectral Lab", styles["table_cell_bold"]), Paragraph("/spectral-lab", styles["code_text"]), Paragraph("102-channel spectrophotometry, diagnostic ice absorption markers (H2O, CO2, CO, CH4).", styles["table_cell"])],
+        [Paragraph("4. Image Analysis Lab", styles["table_cell_bold"]), Paragraph("/image-lab", styles["code_text"]), Paragraph("FITS contrast stretches (Log, Asinh, ZScale), flux-matched subtraction, aperture photometry.", styles["table_cell"])],
+        [Paragraph("5. Discovery Engine", styles["table_cell_bold"]), Paragraph("/discovery", styles["code_text"]), Paragraph("Automated change-detection pipeline flagging moving objects, variables, and detector artifacts.", styles["table_cell"])],
+        [Paragraph("6. Multi-Mission Explorer", styles["table_cell_bold"]), Paragraph("/multi-mission", styles["code_text"]), Paragraph("Cross-match SPHEREx sources with ESA Gaia DR3 astrometry and NASA AllWISE mid-IR colors.", styles["table_cell"])],
+        [Paragraph("7. Research Library", styles["table_cell_bold"]), Paragraph("/research", styles["code_text"]), Paragraph("Curated peer-reviewed publications, instrument specifications, and interactive glossaries.", styles["table_cell"])],
+        [Paragraph("8. Scientific Evidence Dossier", styles["table_cell_bold"]), Paragraph("/dossier", styles["code_text"]), Paragraph("Comprehensive target synthesis, 6-tier provenance system, SHA-256 seal, and PDF reports.", styles["table_cell"])],
+        [Paragraph("9. Scientific Analytics", styles["table_cell_bold"]), Paragraph("/analytics", styles["code_text"]), Paragraph("Multi-Parameter Anomaly Radar charts, flux distributions, and variability statistics.", styles["table_cell"])],
     ]
     t_dash = Table(dash_modules, colWidths=[110, 80, 330])
     t_dash.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#091124")),
         ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor("#0284c7")),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
         ('LEFTPADDING', (0, 0), (-1, -1), 5),
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
     ]))
     story.append(t_dash)
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 4 — SKY EXPLORER
+    # CHAPTER 4  -  SKY EXPLORER
     # =========================================================================
-    story.append(Paragraph("Chapter 4 — Sky Explorer", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 4: Sky Explorer", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "<b>4.1 How to Search for Celestial Objects:</b><br/>"
-        "• <b>By Object Name:</b> Type common designations such as <code>Barnard's Star</code>, <code>RW Aurigae</code>, "
+        "&bull; <b>By Object Name:</b> Type common designations such as <code>Barnard's Star</code>, <code>RW Aurigae</code>, "
         "or <code>WISE 0855</code> into the search box. COSMOSCOPE resolves the coordinates automatically.<br/>"
-        "• <b>By Equatorial Coordinates:</b> Enter Right Ascension (RA) and Declination (Dec) in decimal degrees "
+        "&bull; <b>By Equatorial Coordinates:</b> Enter Right Ascension (RA) and Declination (Dec) in decimal degrees "
         "(e.g., <code>RA: 269.452, Dec: 4.693</code>) or sexagesimal notation (<code>17h 57m 48.5s +04d 41m 36s</code>).",
         styles["body"]
     ))
     story.append(Paragraph(
         "<b>4.2 Using the All-Sky Galaxy Map:</b><br/>"
-        "Powered by Aladin Lite and Astropy WCS routines, the map lets you zoom from an all-sky perspective (30° FOV) "
+        "Powered by Aladin Lite and Astropy WCS routines, the map lets you zoom from an all-sky perspective (30 deg FOV) "
         "down to fine resolution (10 arcminutes). Toggle between survey layers:<br/>"
-        "• <b>DSS2:</b> Optical baseline showing visible stars and galactic structures.<br/>"
-        "• <b>2MASS:</b> Near-infrared (J, H, Ks bands) penetrating moderate dust clouds.<br/>"
-        "• <b>AllWISE:</b> Mid-infrared (3.4 – 22 µm) revealing thermal dust emission and cold brown dwarfs.",
+        "&bull; <b>DSS2:</b> Optical baseline showing visible stars and galactic structures.<br/>"
+        "&bull; <b>2MASS:</b> Near-infrared (J, H, Ks bands) penetrating moderate dust clouds.<br/>"
+        "&bull; <b>AllWISE:</b> Mid-infrared (3.4 - 22 microns) revealing thermal dust emission and cold brown dwarfs.",
         styles["body"]
     ))
     story.append(Paragraph(
-        "<b>4.3 Loading SPHEREx Cutouts:</b><br/>"
-        "Clicking any target icon loads authentic Level-2 Multi-Extension FITS cutouts from NASA archives. "
-        "The observation metadata drawer displays the UTC observation timestamp, MJD date, SPHEREx detector "
-        "(D1 through D6), and native flux units (MegaJanskys per steradian).",
+        "<b>4.3 Controls and Cutout Loading:</b><br/>"
+        "&bull; <b>Field of View (FOV) Slider:</b> Adjusts zoom between 10 arcmin and 30 deg.<br/>"
+        "&bull; <b>Target Preset Cards:</b> Quick-jump cards for benchmark scientific targets.<br/>"
+        "&bull; <b>'Load Cutout' Button:</b> Retrieves calibrated Level-2 Multi-Extension FITS cutouts from NASA archives.<br/>"
+        "&bull; <b>Metadata Drawer:</b> Inspect UTC observation timestamp, MJD date, SPHEREx detector (D1-D6), and flux units (MJy/sr).",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 5 — COSMIC TIME MACHINE
+    # CHAPTER 5  -  COSMIC TIME MACHINE
     # =========================================================================
-    story.append(Paragraph("Chapter 5 — Cosmic Time Machine", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 5: Cosmic Time Machine", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
@@ -549,18 +588,18 @@ def generate_tutorial_pdf() -> bytes:
     ))
     story.append(Paragraph(
         "<b>5.2 Player Controls:</b><br/>"
-        "• <b>Play / Pause:</b> Starts or pauses continuous time-lapse playback across the historical sequence.<br/>"
-        "• <b>Previous / Next:</b> Steps frame-by-frame through individual observation epochs.<br/>"
-        "• <b>Timeline Slider:</b> Jump directly to any recorded observation date.<br/>"
-        "• <b>Playback Speed (0.5× – 3.0×):</b> Dynamically speeds up or slows down playback without reloading data.",
+        "&bull; <b>Play / Pause:</b> Starts or pauses continuous time-lapse playback across the historical sequence.<br/>"
+        "&bull; <b>Previous / Next:</b> Steps frame-by-frame through individual observation epochs.<br/>"
+        "&bull; <b>Timeline Slider:</b> Jump directly to any recorded observation date.<br/>"
+        "&bull; <b>Playback Speed (0.5x - 3.0x):</b> Dynamically speeds up or slows down playback without reloading data.",
         styles["body"]
     ))
     story.append(Paragraph(
-        "<b>5.3 Five Powerful Comparison Modes:</b><br/>"
+        "<b>5.3 Five Comparison Modes:</b><br/>"
         "1. <b>Single Frame:</b> Inspect individual calibrated FITS exposures in high resolution.<br/>"
         "2. <b>Side-by-Side:</b> Place two distinct epochs side-by-side with synchronized zoom and pan.<br/>"
         "3. <b>Split Slider:</b> Interactive before/after split curtain slider to reveal subtle shifts.<br/>"
-        "4. <b>Image Subtraction:</b> Computes flux-matched difference (I₂ − αI₁), making non-changing stars "
+        "4. <b>Image Subtraction:</b> Computes flux-matched difference (I2 - alpha*I1), making non-changing stars "
         "disappear completely and leaving moving or variable objects brightly illuminated.<br/>"
         "5. <b>Co-Addition (Stacking):</b> Stacks multi-epoch frames to reduce noise and enhance faint targets.",
         styles["body"]
@@ -568,37 +607,38 @@ def generate_tutorial_pdf() -> bytes:
     story.append(Paragraph(
         "<b>5.4 Variable-Frequency Blinking:</b><br/>"
         "Toggle the <b>Blink</b> mode to rapidly alternate between Epoch 1 and Epoch 2 (at 0.5 to 3.0 Hz). "
-        "The human visual cortex instantly spots motion (e.g. Barnard's Star jumping across pixels) or flaring.",
+        "The human eye immediately catches stellar motion (e.g. Barnard's Star jumping across pixels) or flaring.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 6 — SPECTRAL LAB
+    # CHAPTER 6  -  SPECTRAL LAB
     # =========================================================================
-    story.append(Paragraph("Chapter 6 — Spectral Lab & 102-Band Spectrophotometry", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 6: Spectral Lab & 102-Band Spectrophotometry", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "<b>6.1 The 102-Band SPHEREx Concept:</b><br/>"
-        "SPHEREx utilizes six 2048×2048 detector arrays equipped with Linear Variable Filters (LVF). As the telescope "
-        "scans, each star is observed across 102 narrow spectral channels spanning 0.75 µm to 5.0 µm. This produces "
+        "SPHEREx utilizes six 2048x2048 detector arrays equipped with Linear Variable Filters (LVF). As the telescope "
+        "scans, each star is observed across 102 narrow spectral channels spanning 0.75 microns to 5.0 microns. This produces "
         "a complete Spectral Energy Distribution (SED) for every point in the sky.",
         styles["body"]
     ))
     story.append(Paragraph(
-        "<b>6.2 Reading Spectral Graphs:</b><br/>"
-        "• <b>Horizontal Axis (Wavelength, µm):</b> Shows infrared channels from 0.75 µm to 5.0 µm.<br/>"
-        "• <b>Vertical Axis (Flux Density, µJy or Normalized Flux):</b> Shows measured energy intensity. "
-        "Absorption features appear as pronounced downward troughs where cold gas or ice absorbs light.",
+        "<b>6.2 Controls & Reading Spectral Graphs:</b><br/>"
+        "&bull; <b>Wavelength Axis (0.75 - 5.0 microns):</b> Horizontal axis showing narrow-band channels.<br/>"
+        "&bull; <b>Flux Density Axis:</b> Vertical axis showing calibrated energy in uJy. Dips indicate absorption.<br/>"
+        "&bull; <b>Continuum Fitting Toggle:</b> Fits baseline polynomial to compute absorption line depths.<br/>"
+        "&bull; <b>Export Plot:</b> Download high-resolution vector charts or CSV data arrays.",
         styles["body"]
     ))
     story.append(Paragraph(
         "<b>6.3 Diagnostic Chemical & Molecular Ice Markers:</b><br/>"
-        "• <b>Water-Ice (H₂O):</b> Deep absorption feature at <b>3.05 µm</b> indicating frozen grains in protoplanetary disks.<br/>"
-        "• <b>Carbon Dioxide (CO₂):</b> Sharp molecular absorption dip at <b>4.27 µm</b>.<br/>"
-        "• <b>Carbon Monoxide (CO):</b> Characteristic band at <b>4.67 µm</b> in cold interstellar environments.<br/>"
-        "• <b>Methane (CH₄):</b> Absorption troughs at <b>1.67 µm and 3.3 µm</b> indicative of cool brown dwarf atmospheres.",
+        "&bull; <b>Water-Ice (H<sub>2</sub>O):</b> Deep absorption feature at <b>3.05 microns</b> indicating frozen grains.<br/>"
+        "&bull; <b>Carbon Dioxide (CO<sub>2</sub>):</b> Sharp molecular absorption dip at <b>4.27 microns</b>.<br/>"
+        "&bull; <b>Carbon Monoxide (CO):</b> Characteristic band at <b>4.67 microns</b> in cold interstellar environments.<br/>"
+        "&bull; <b>Methane (CH<sub>4</sub>):</b> Absorption troughs at <b>1.67 microns and 3.3 microns</b> in cool brown dwarf atmospheres.",
         styles["body"]
     ))
     story.append(make_callout(
@@ -607,45 +647,40 @@ def generate_tutorial_pdf() -> bytes:
         styles,
         title="DATA CLASSIFICATION TRANSPARENCY"
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 7 — IMAGE ANALYSIS LAB
+    # CHAPTER 7  -  IMAGE ANALYSIS LAB
     # =========================================================================
-    story.append(Paragraph("Chapter 7 — Image Analysis Lab", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 7: Image Analysis Lab", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "<b>7.1 FITS Processing & Astronomical Stretches:</b><br/>"
-        "Astronomical images have immense dynamic range—a bright star can be 100,000 times brighter than the background. "
-        "To reveal faint details without saturating bright pixels, the Image Analysis Lab supports five stretches:<br/>"
-        "• <b>Linear:</b> Direct scaling, best for uniform bright fields.<br/>"
-        "• <b>Logarithmic:</b> Compresses high-flux cores to reveal faint outer nebular structures.<br/>"
-        "• <b>Asinh (Inverse Hyperbolic Sine):</b> Smoothly transitions from linear at the noise floor to logarithmic "
-        "at high intensities, preserving stellar profiles without blowing out cores.<br/>"
-        "• <b>Square Root:</b> Balanced compression commonly used in optical astronomy.<br/>"
-        "• <b>ZScale (IRAF Standard):</b> Automatically samples pixel variance to optimize contrast around the sky noise floor.",
+        "Astronomical images have immense dynamic range - a bright star can be 100,000 times brighter than the background. "
+        "The Image Analysis Lab provides five scientific histogram stretch algorithms:<br/>"
+        "&bull; <b>Linear:</b> Direct scaling, best for uniform bright fields.<br/>"
+        "&bull; <b>Logarithmic:</b> Compresses high-flux cores to reveal faint outer nebular structures.<br/>"
+        "&bull; <b>Asinh:</b> Smoothly transitions from linear at the noise floor to logarithmic at high intensities.<br/>"
+        "&bull; <b>Square Root:</b> Balanced compression commonly used in optical astronomy.<br/>"
+        "&bull; <b>ZScale:</b> IRAF standard sampling pixel variance around the sky noise floor.",
         styles["body"]
     ))
     story.append(Paragraph(
-        "<b>7.2 False-Color Astronomical Colormaps:</b><br/>"
-        "Select between <i>Inferno</i>, <i>Magma</i>, <i>Viridis</i>, <i>Cividis</i> (perceptually uniform & colorblind-safe), "
-        "and inverted greyscale.",
+        "<b>7.2 Controls, False-Color Palettes & Photometry:</b><br/>"
+        "&bull; <b>Colormap Selector:</b> Toggle between Inferno, Magma, Viridis, Cividis (colorblind-safe), and Inverted Greyscale.<br/>"
+        "&bull; <b>Flux-Matched Subtraction (I2 - alpha*I1):</b> Rescales and subtracts baseline to leave only moving or variable flux.<br/>"
+        "&bull; <b>Synthetic Aperture Photometry:</b> Set circular aperture radius and sky background annulus. Calculates:<br/>"
+        "&nbsp;&nbsp;&nbsp;&nbsp;<code>Net Flux = Total Aperture Flux - (Area x Median Sky Background)</code><br/>"
+        "&bull; <b>Export Tools:</b> Download publication-ready PNGs or calibrated FITS cutouts.",
         styles["body"]
     ))
-    story.append(Paragraph(
-        "<b>7.3 Synthetic Aperture Photometry:</b><br/>"
-        "Place a calibrated circular aperture over any star and specify an outer sky annulus. The engine computes:<br/>"
-        "<code>Net Flux = Total Aperture Flux − (Area × Median Sky Background)</code><br/>"
-        "Calibrated instrumental fluxes are converted into standard astronomical AB magnitudes with ±1σ statistical uncertainties.",
-        styles["body"]
-    ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 8 — DISCOVERY ENGINE
+    # CHAPTER 8  -  DISCOVERY ENGINE
     # =========================================================================
-    story.append(Paragraph("Chapter 8 — Discovery Engine & Automated Astronomical Change Detection", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 8: Discovery Engine & Automated Astronomical Change Detection", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
@@ -655,20 +690,30 @@ def generate_tutorial_pdf() -> bytes:
         styles["body"]
     ))
     story.append(Paragraph(
-        "<b>8.2 Candidate Classifications:</b><br/>"
-        "• <b>Candidate Moving Objects:</b> Stars with high proper motion or potential solar system bodies showing significant astrometric displacement.<br/>"
-        "• <b>Variable Sources:</b> Stars exhibiting notable flux changes (>0.3 magnitude variation), such as eruptive Young Stellar Objects or pulsating red giants.<br/>"
-        "• <b>Known Asteroids:</b> Positional matches with minor planet ephemerides.<br/>"
-        "• <b>Artifacts and Glitches:</b> Single-epoch cosmic ray hits, bad pixels, or optical diffraction spikes filtered out by multi-epoch consistency checks.",
+        "<b>8.2 Candidate Classifications & Category Filters:</b><br/>"
+        "&bull; <b>Candidate Moving Objects:</b> Stars with high proper motion showing significant angular displacement.<br/>"
+        "&bull; <b>Variable Sources:</b> Stars exhibiting notable flux changes (>0.3 mag variation).<br/>"
+        "&bull; <b>Transients / Emerging:</b> New sources appearing in later epochs.<br/>"
+        "&bull; <b>Artifacts and Glitches:</b> Single-epoch cosmic ray hits, bad pixels, or optical diffraction spikes.",
         styles["body"]
     ))
     story.append(Paragraph(
         "<b>8.3 Candidate Triage Queue & Source Investigation Modal:</b><br/>"
-        "Clicking <b>'Inspect Candidate'</b> opens the investigation modal, presenting multi-epoch thumbnail stamps, "
-        "proper motion displacement curves, and cross-match catalogue details. Users can annotate findings and export "
-        "candidate ledgers as CSV files.",
+        "Clicking <b>'Inspect Candidate'</b> expands the full investigation laboratory featuring dual interactive charts: "
+        "a multi-epoch <b>Light Curve</b> (photometric flux evolution) and an <b>Astrometric Trajectory</b> (RA vs Dec vector mapping). "
+        "External catalogue cross-matches with Gaia DR3 and AllWISE are displayed directly below the charts.",
         styles["body"]
     ))
+
+    # Embed Actual Screenshot: Investigation Panel
+    img_investigation = os.path.join(assets_dir, "investigation_panel_screenshot.png")
+    if os.path.exists(img_investigation):
+        story.append(Spacer(1, 4))
+        im = ReportLabImage(img_investigation, width=380, height=335)
+        story.append(im)
+        story.append(Paragraph("Figure 8.1: Source Investigation Modal showing multi-epoch Light Curve, Astrometric Trajectory, and external catalogue cross-matches.", styles["image_caption"]))
+        story.append(Spacer(1, 4))
+
     story.append(make_callout(
         "CRITICAL SCIENTIFIC PRINCIPLE: All automated detections are strictly designated as <b>EXPLORATORY CANDIDATES</b>. "
         "They represent statistical anomalies requiring multi-mission verification and should never be assumed to be confirmed discoveries.",
@@ -676,23 +721,23 @@ def generate_tutorial_pdf() -> bytes:
         title="SCIENTIFIC CAUTION & CANDIDATE TRIAGE",
         color_hex="#d97706"
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 9 — MULTI-MISSION EXPLORER
+    # CHAPTER 9  -  MULTI-MISSION EXPLORER
     # =========================================================================
-    story.append(Paragraph("Chapter 9 — Multi-Mission Explorer", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 9: Multi-Mission Explorer", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "<b>9.1 Cross-Matching SPHEREx with Global Catalogues:</b><br/>"
         "Astronomical objects look completely different across wavelengths. The Multi-Mission Explorer queries external "
-        "catalogues within a 3.0 arcsecond cone search to provide multi-wavelength context:<br/>"
-        "• <b>ESA Gaia DR3:</b> Provides ultra-precise optical astrometry, proper motion vectors (µ_α cos δ, µ_δ), "
+        "catalogues within an adjustable cone search (1.5 to 5.0 arcseconds):<br/>"
+        "&bull; <b>ESA Gaia DR3:</b> Provides ultra-precise optical astrometry, proper motion vectors (mu_alpha, mu_delta), "
         "geometric parallaxes (distances), and G/BP/RP magnitudes.<br/>"
-        "• <b>NASA AllWISE:</b> Provides mid-infrared photometry in W1 (3.4 µm), W2 (4.6 µm), W3 (12 µm), and W4 (22 µm) "
+        "&bull; <b>NASA AllWISE:</b> Provides mid-infrared photometry in W1 (3.4 microns), W2 (4.6 microns), W3 (12 microns), and W4 (22 microns) "
         "to check for warm circumstellar dust or planetary atmospheres.<br/>"
-        "• <b>2MASS:</b> Near-infrared baseline (J, H, Ks) from 1997–2001, providing a 25-year time baseline for proper motion.",
+        "&bull; <b>2MASS:</b> Near-infrared baseline (J, H, Ks) from 1997-2001, providing a 25-year time baseline for proper motion.",
         styles["body"]
     ))
     story.append(Paragraph(
@@ -702,33 +747,33 @@ def generate_tutorial_pdf() -> bytes:
         "instrumental anomaly.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 10 — RESEARCH LIBRARY
+    # CHAPTER 10  -  RESEARCH LIBRARY
     # =========================================================================
-    story.append(Paragraph("Chapter 10 — Research Library", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 10: Research Library", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
-        "The Research Library (<code>/research</code>) is an educational and documentation center integrated into the platform:<br/>"
-        "• <b>Mission Documentation:</b> Direct links to NASA/IPAC IRSA SPHEREx release notes, instrument papers, and detector calibration handbooks.<br/>"
-        "• <b>Interactive Terminology Glossary:</b> Clear definitions for essential concepts like WCS, LVF, Point Spread Function (PSF), "
+        "The Research Library (<code>/research</code>) is an educational and academic repository integrated into the platform:<br/>"
+        "&bull; <b>Mission Documentation:</b> Direct links to NASA/IPAC IRSA SPHEREx release notes, instrument papers, and detector calibration handbooks.<br/>"
+        "&bull; <b>Interactive Terminology Glossary:</b> Clear definitions for essential concepts like WCS, LVF, Point Spread Function (PSF), "
         "Signal-to-Noise Ratio (SNR), and AB Magnitudes.<br/>"
-        "• <b>API Reference:</b> Documentation for querying COSMOSCOPE REST endpoints and integrating data into Python research workflows.",
+        "&bull; <b>Citation & Export:</b> Quick copy tools for BibTeX academic citations and literature links.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 11 — SCIENTIFIC EVIDENCE DOSSIER
+    # CHAPTER 11  -  SCIENTIFIC EVIDENCE DOSSIER
     # =========================================================================
-    story.append(Paragraph("Chapter 11 — Scientific Evidence Dossier & Provenance System", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 11: Scientific Evidence Dossier & Provenance System", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
-        "The Scientific Evidence Dossier (<code>/dossier</code>) generates comprehensive target investigation reports "
-        "with cryptographic provenance verification. Every displayed scientific metric is assigned to one of six transparent tiers:",
+        "The Scientific Evidence Dossier (<code>/dossier</code>) synthesizes every observation, coordinate calculation, "
+        "and spectral measurement for a target into an auditable scientific report. Every metric is assigned to one of six transparent tiers:",
         styles["body"]
     ))
 
@@ -741,18 +786,27 @@ def generate_tutorial_pdf() -> bytes:
         [Paragraph("Tier 5", styles["table_cell_bold"]), Paragraph("<font color='#d97706'><b>SIMULATED</b></font>", styles["table_cell"]), Paragraph("Theoretical models (e.g. 24-epoch Mira pulsation baselines or simulated Keplerian orbit trajectories).", styles["table_cell"])],
         [Paragraph("Tier 6", styles["table_cell_bold"]), Paragraph("<font color='#e11d48'><b>UNAVAILABLE</b></font>", styles["table_cell"]), Paragraph("Explicitly marked when no reliable astronomical data currently exists in the archive, preventing false guesses.", styles["table_cell"])],
     ]
-    t_prov = Table(provenance_table_data, colWidths=[60, 110, 350])
+    t_prov = Table(provenance_table_data, colWidths=[55, 105, 360])
     t_prov.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#091124")),
         ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor("#0284c7")),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0, 0), (-1, -1), 3.5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5),
+        ('TOPPADDING', (0, 0), (-1, -1), 3),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
         ('LEFTPADDING', (0, 0), (-1, -1), 5),
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
     ]))
     story.append(t_prov)
     story.append(Spacer(1, 8))
+
+    # Embed Actual Screenshot: Evidence Dossier
+    img_dossier = os.path.join(assets_dir, "evidence_dossier_multiepoch_p1.png")
+    if os.path.exists(img_dossier):
+        story.append(Spacer(1, 4))
+        im_d = ReportLabImage(img_dossier, width=240, height=339)
+        story.append(im_d)
+        story.append(Paragraph("Figure 11.1: Publication-grade Scientific Evidence Dossier PDF with observation ledger and 6-tier provenance.", styles["image_caption"]))
+        story.append(Spacer(1, 4))
 
     story.append(Paragraph(
         "<b>Evidence Passport PDF Export:</b><br/>"
@@ -761,49 +815,49 @@ def generate_tutorial_pdf() -> bytes:
         "aperture calculations, and catalogue matches for formal peer review.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 12 — SCIENTIFIC ANALYTICS
+    # CHAPTER 12  -  SCIENTIFIC ANALYTICS
     # =========================================================================
-    story.append(Paragraph("Chapter 12 — Scientific Analytics", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 12: Scientific Analytics", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "The Analytics dashboard (<code>/analytics</code>) provides statistical visualizations powered by Plotly.js:<br/>"
-        "• <b>Multi-Parameter Anomaly Radar:</b> Plots a four-dimensional radar evaluating: "
-        "<i>Proper Motion Velocity</i> (mas/yr), <i>Flux Variability Amplitude</i> (%), <i>3.05 µm Ice Optical Depth (τ)</i>, "
+        "&bull; <b>Multi-Parameter Anomaly Radar:</b> Plots a four-dimensional radar evaluating: "
+        "<i>Proper Motion Velocity</i> (mas/yr), <i>Flux Variability Amplitude</i> (%), <i>3.05 micron Ice Optical Depth (tau)</i>, "
         "and <i>Spectral Novelty</i>.<br/>"
-        "• <b>Interpreting Radar Shapes:</b><br/>"
+        "&bull; <b>Interpreting Radar Shapes:</b><br/>"
         "  - Stars protruding in the <i>Motion</i> axis: Nearby kinematic stars (e.g., Barnard's Star).<br/>"
         "  - Stars protruding in the <i>Variability</i> axis: Pulsating giants or erupting YSOs (e.g., R Draconis).<br/>"
         "  - Targets protruding in the <i>Ice Depth</i> axis: Cold objects with water-ice envelopes (e.g., WISE 0855).<br/>"
-        "• <b>Flux Variance Distribution:</b> Compares measured epoch brightness against expected instrument noise floors.",
+        "&bull; <b>Flux Variance Distribution:</b> Compares measured epoch brightness against expected instrument noise floors.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 13 — UNDERSTANDING ASTRONOMICAL DATA (GLOSSARY)
+    # CHAPTER 13  -  UNDERSTANDING ASTRONOMICAL DATA (GLOSSARY)
     # =========================================================================
-    story.append(Paragraph("Chapter 13 — Understanding Astronomical Data (Glossary)", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 13: Understanding Astronomical Data (Glossary)", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     glossary_terms = [
-        ("Right Ascension (RA, α)", "The celestial equivalent of longitude, measuring angular distance eastward along the celestial equator from the vernal equinox (0° to 360° or 0h to 24h)."),
-        ("Declination (Dec, δ)", "The celestial equivalent of latitude, measuring angular distance north (+0° to +90°) or south (-0° to -90°) from the celestial equator."),
-        ("Field of View (FOV)", "The angular size of the sky visible through the detector, measured in degrees (°), arcminutes (′), or arcseconds (″). 1° = 60 arcmin = 3600 arcsec."),
+        ("Right Ascension (RA, alpha)", "The celestial equivalent of longitude, measuring angular distance eastward along the celestial equator from the vernal equinox (0 deg to 360 deg or 0h to 24h)."),
+        ("Declination (Dec, delta)", "The celestial equivalent of latitude, measuring angular distance north (+0 deg to +90 deg) or south (-0 deg to -90 deg) from the celestial equator."),
+        ("Field of View (FOV)", "The angular size of the sky visible through the detector, measured in degrees, arcminutes, or arcseconds. 1 deg = 60 arcmin = 3600 arcsec."),
         ("FITS File", "Flexible Image Transport System: the global standard digital format for astronomical pixel matrices and WCS coordinate headers."),
         ("Observation Epoch", "The precise timestamp (UTC / MJD) when an astronomical exposure was captured by the space telescope."),
-        ("Infrared Wavelength", "Light with wavelengths longer than visible red (0.75 µm to 1000 µm), optimal for seeing through cosmic dust and observing cool objects."),
+        ("Infrared Wavelength", "Light with wavelengths longer than visible red (0.75 to 1000 microns), optimal for seeing through cosmic dust and observing cool objects."),
         ("Spectral Band", "A discrete wavelength window measured by an optical filter. SPHEREx records 102 continuous narrow bands."),
-        ("Flux Density (µJy)", "The rate of energy transfer per unit area per unit frequency. 1 Jansky (Jy) = 10⁻²⁶ W·m⁻²·Hz⁻¹."),
-        ("AB Magnitude", "A logarithmic brightness scale. Brighter objects have smaller or negative magnitudes; each step of 5 magnitudes equals a 100× flux ratio."),
+        ("Flux Density (uJy)", "The rate of energy transfer per unit area per unit frequency. 1 Jansky (Jy) = 10^-26 W/m^2/Hz."),
+        ("AB Magnitude", "A logarithmic brightness scale. Brighter objects have smaller or negative magnitudes; each step of 5 magnitudes equals a 100x flux ratio."),
         ("Proper Motion (mas/yr)", "The apparent angular motion of a star across the celestial sphere caused by its real velocity through our galaxy relative to the Sun."),
         ("Aperture Photometry", "Measuring total light within a circular radius and subtracting the median background sky to calculate true source flux."),
         ("Signal-to-Noise Ratio (SNR)", "The ratio of source signal to background noise. Values above 5 indicate confident detections; above 10 indicate precision measurements."),
         ("World Coordinate System (WCS)", "Mathematical transformation matrices embedded in FITS headers converting (X, Y) pixel coordinates into real-world sky coordinates (RA, Dec)."),
-        ("Image Subtraction", "Subtracting a normalized reference image from a science exposure (I₂ − αI₁) to isolate moving objects and variable transients."),
+        ("Image Subtraction", "Subtracting a normalized reference image from a science exposure (I2 - alpha*I1) to isolate moving objects and variable transients."),
     ]
 
     gloss_data = [[Paragraph("TERM", styles["table_header"]), Paragraph("BEGINNER-FRIENDLY SCIENTIFIC DEFINITION", styles["table_header"])]]
@@ -818,79 +872,84 @@ def generate_tutorial_pdf() -> bytes:
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#091124")),
         ('BOX', (0, 0), (-1, -1), 0.75, colors.HexColor("#0284c7")),
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-        ('TOPPADDING', (0, 0), (-1, -1), 3),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ('TOPPADDING', (0, 0), (-1, -1), 2.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2.5),
         ('LEFTPADDING', (0, 0), (-1, -1), 5),
         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
     ]))
     story.append(t_gloss)
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 14 — DATA SOURCES & SCIENTIFIC RELIABILITY
+    # CHAPTER 14  -  DATA SOURCES & SCIENTIFIC RELIABILITY
     # =========================================================================
-    story.append(Paragraph("Chapter 14 — Data Sources and Scientific Reliability", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 14: Data Sources and Scientific Reliability", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     story.append(Paragraph(
         "<b>14.1 Integrated Astronomical Archives:</b><br/>"
-        "• <b>NASA/IPAC Infrared Science Archive (IRSA):</b> Host for SPHEREx Quick Release and Level-2 MEF FITS cutouts.<br/>"
-        "• <b>ESA Gaia Data Release 3 (DR3):</b> High-precision space astrometry and proper motion vectors.<br/>"
-        "• <b>NASA AllWISE & 2MASS:</b> Multi-epoch mid- and near-infrared reference photometry.<br/>"
-        "• <b>CDS SIMBAD:</b> Strasbourg Astronomical Data Center cross-identifications and bibliography.",
+        "&bull; <b>NASA/IPAC Infrared Science Archive (IRSA):</b> Host for SPHEREx Quick Release and Level-2 MEF FITS cutouts.<br/>"
+        "&bull; <b>ESA Gaia Data Release 3 (DR3):</b> High-precision space astrometry and proper motion vectors.<br/>"
+        "&bull; <b>NASA AllWISE & 2MASS:</b> Multi-epoch mid- and near-infrared reference photometry.<br/>"
+        "&bull; <b>CDS SIMBAD:</b> Strasbourg Astronomical Data Center cross-identifications and bibliography.",
         styles["body"]
     ))
     story.append(Paragraph(
-        "<b>14.2 Reliability & Limitations:</b><br/>"
-        "All measurements adhere to peer-reviewed astronomical pipelines. However, users should understand:<br/>"
-        "1. Single-epoch detections must not be declared as permanent discoveries without multi-epoch confirmation.<br/>"
-        "2. Optical diffraction spikes and cosmic rays can trigger false-positive candidate flags.<br/>"
-        "3. Modelled light curves (such as 24-epoch Mira cycles) represent theoretical baselines and are never labeled as direct telescope exposures.",
+        "<b>14.2 Scientific Data Scope & Reliability Notice:</b><br/>"
+        "COSMOSCOPE currently presents a curated selection of astronomical targets as scientific case studies to demonstrate "
+        "its multi-epoch analysis and visualisation capabilities. These examples are not an exhaustive catalogue of known "
+        "celestial objects or available mission observations. The underlying astronomical archives contain additional targets "
+        "and datasets that may be explored as data coverage and integration support expand. Data availability depends on the "
+        "relevant mission archives, observation coverage, and supported data sources.",
         styles["body"]
     ))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
+
+    # Page break before Chapter 15 to avoid orphan heading
+    story.append(PageBreak())
 
     # =========================================================================
-    # CHAPTER 15 — FREQUENTLY ASKED QUESTIONS
+    # CHAPTER 15 - FREQUENTLY ASKED QUESTIONS
     # =========================================================================
-    story.append(Paragraph("Chapter 15 — Frequently Asked Questions", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 15: Frequently Asked Questions", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     faq_items = [
         ("Are the astronomical observations in COSMOSCOPE real?", "Yes. All FITS images originate directly from authentic NASA/IPAC IRSA SPHEREx Quick Release collections with calibrated WCS headers."),
         ("Do I need an astrophysics degree to use COSMOSCOPE?", "No! COSMOSCOPE is designed for students, amateur astronomers, and professional scientists alike. Interactive visual controls make complex infrared astronomy accessible to everyone."),
         ("How does SPHEREx compare to the James Webb Space Telescope (JWST)?", "SPHEREx is a wide-angle all-sky census telescope mapping 100% of the sky every 6 months to discover interesting targets. JWST is a narrow-field pointed observatory with a 6.5-meter mirror built for ultra-deep inspections."),
-        ("How does offline caching work during judging?", "COSMOSCOPE includes a deterministic local FITS and JSON cache layer. If external NASA APIs experience rate limits, the platform switches seamlessly to local archives with zero downtime."),
+        ("What is the scope of data currently displayed in COSMOSCOPE?", "COSMOSCOPE presents curated benchmark targets to demonstrate multi-epoch change detection and spectral analysis. As public archive coverage expands, additional targets and datasets can be explored."),
+        ("Can I export data and analysis results from COSMOSCOPE?", "Yes. You can download publication-ready FITS cutouts, high-resolution PNG charts, light curve photometric data, and comprehensive PDF Scientific Evidence Dossiers."),
         ("How do I report or document a candidate discovery?", "Use the Source Investigation Modal in the Discovery Engine, annotate notes, and export a cryptographically sealed Evidence Passport PDF from the Evidence Dossier."),
     ]
 
     for q, a in faq_items:
         story.append(Paragraph(f"<b>Q: {q}</b>", styles["section_h2"]))
         story.append(Paragraph(a, styles["body"]))
-    story.append(Spacer(1, 14))
+    story.append(Spacer(1, 10))
 
     # =========================================================================
-    # CHAPTER 16 — QUICK START GUIDE
+    # CHAPTER 16  -  QUICK START GUIDE
     # =========================================================================
-    story.append(Paragraph("Chapter 16 — Quick Start Guide: Your First 10 Minutes with COSMOSCOPE", styles["chapter_h1"]))
+    story.append(Paragraph("Chapter 16: Quick Start Guide: Your First 10 Minutes with COSMOSCOPE", styles["chapter_h1"]))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#0284c7"), spaceAfter=8))
     
     steps = [
         ("Step 1: Launch Dashboard", "Navigate to <b>COSMOSCOPE</b> and click <b>'Explore Dashboard'</b> in the top navigation bar."),
-        ("Step 2: Select a Research Target", "In Sky Explorer, click <b>'Barnard's Star'</b> or type its name into the search bar to center the coordinates (RA: 269.452°, Dec: +4.693°)."),
+        ("Step 2: Select a Research Target", "In Sky Explorer, click <b>'Barnard's Star'</b> or type its name into the search bar to center the coordinates (RA: 269.452 deg, Dec: +4.693 deg)."),
         ("Step 3: Explore the All-Sky Map", "Zoom in and out on the All-Sky Galaxy Map. Toggle between DSS2 optical and AllWISE infrared layers to observe dust penetration."),
         ("Step 4: Open SPHEREx FITS Cutout", "Click <b>'Load Cutout'</b> to inspect the authentic Level-2 SPHEREx FITS image in Detector D3."),
         ("Step 5: Launch the Cosmic Time Machine", "Switch to the <b>Time Machine</b> tab. Click <b>Play</b> to watch observations taken across different survey dates."),
-        ("Step 6: Toggle Blinking Mode", "Enable the <b>Blink</b> comparator mode. Observe Barnard's Star jumping across pixels due to its 10.36″/year proper motion!"),
-        ("Step 7: Inspect 102-Band Spectrum", "Open the <b>Spectral Lab</b>. Examine the 0.75–5.0 µm flux distribution and note characteristic atmospheric features."),
+        ("Step 6: Toggle Blinking Mode", "Enable the <b>Blink</b> comparator mode. Observe Barnard's Star jumping across pixels due to its 10.36 arcsec/year proper motion!"),
+        ("Step 7: Inspect 102-Band Spectrum", "Open the <b>Spectral Lab</b>. Examine the 0.75-5.0 microns flux distribution and note characteristic atmospheric features."),
         ("Step 8: Run Automated Change Detection", "Navigate to the <b>Discovery Engine</b>. Review candidate anomalies flagged across epochs, noting SNR and displacement values."),
         ("Step 9: Cross-Match with Gaia DR3", "In the <b>Multi-Mission Explorer</b>, verify the 10,359 mas/yr proper motion vector retrieved from ESA's Gaia DR3 catalogue."),
         ("Step 10: Export Evidence Passport PDF", "Navigate to the <b>Evidence Dossier</b> and click <b>'Download Evidence Passport'</b> to generate a tamper-proof SHA-256 PDF report documenting your investigation!"),
     ]
 
     for title, desc in steps:
-        story.append(Paragraph(f"<b>{title}</b> — {desc}", styles["bullet"]))
-    story.append(Spacer(1, 14))
+        story.append(Paragraph(f"<b>{title}</b> - {desc}", styles["bullet"]))
+    story.append(Spacer(1, 10))
 
     # Closing Sign-off
     story.append(Paragraph(
@@ -906,7 +965,6 @@ def generate_tutorial_pdf() -> bytes:
 
 
 if __name__ == "__main__":
-    # Test script generation
     pdf_bytes = generate_tutorial_pdf()
     out_path = "COSMOSCOPE_Complete_User_Guide.pdf"
     with open(out_path, "wb") as f:

@@ -35,7 +35,7 @@ export default function FaqSection() {
     { id: 'general', label: 'General FAQs', icon: BookOpen }
   ];
 
-  // 28 Rigorous, Beginner-Friendly FAQs in Exact Requested Order
+  // 27 Rigorous, Beginner-Friendly FAQs in Exact Requested Order
   const faqData = [
     // =========================================================================
     // CATEGORY 1 — ABOUT COSMOSCOPE
@@ -663,24 +663,6 @@ export default function FaqSection() {
       category: 'general',
       categoryLabel: 'General FAQs',
       number: '27',
-      q: 'How does offline and resilient fallback caching work during judging?',
-      summary: 'Deterministic local FITS/JSON cache guaranteeing 100% uptime and offline evaluation.',
-      a: (
-        <div className="space-y-3">
-          <p>
-            To guarantee a flawless evaluation experience during judging or demonstrations, COSMOSCOPE implements an <strong>offline-resilient caching architecture</strong>.
-          </p>
-          <p>
-            If external NASA or ESA network endpoints experience rate limits or downtime, the platform gracefully switches to authenticated local FITS cutouts and verified JSON responses with zero downtime and full mathematical fidelity.
-          </p>
-        </div>
-      )
-    },
-    {
-      id: 'q28',
-      category: 'general',
-      categoryLabel: 'General FAQs',
-      number: '28',
       q: 'How do I report or investigate a potential candidate anomaly?',
       summary: 'Inspect candidates in the Discovery Engine, annotate notes, and export an Evidence Passport.',
       a: (
