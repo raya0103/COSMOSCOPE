@@ -1,8 +1,23 @@
 /**
  * REST API client for SPHEREx EXPLORER Backend.
+ *
+ * Local development: requests proxy through Vite to http://127.0.0.1:8000
+ *   (no env var needed — BASE_URL stays '/api', Vite proxy handles it)
+ *
+ * Production (Vercel): set VITE_API_BASE_URL to the Render backend root,
+ *   e.g. https://cosmoscope-2x99.onrender.com
+ *   BASE_URL will become https://cosmoscope-2x99.onrender.com/api
  */
 
-const BASE_URL = '/api';
+const _rawBase = import.meta.env.VITE_API_BASE_URL;
+const BASE_URL = _rawBase
+  ? `${_rawBase.replace(/\/+$/, '')}/api`
+  : '/api';
+
+/** Shared base for components that need to build raw fetch URLs or window.open URLs. */
+export function getApiBase() {
+  return BASE_URL;
+}
 
 async function fetchJson(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;

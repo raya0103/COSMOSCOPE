@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import SearchHeader from '../components/SearchHeader';
 import ProvenanceBadge from '../components/ProvenanceBadge';
-import { api } from '../services/api';
+import { api, getApiBase } from '../services/api';
 
 export default function ScientificEvidenceDossier() {
   const [searchParams] = useSearchParams();
@@ -54,7 +54,7 @@ export default function ScientificEvidenceDossier() {
     });
 
     try {
-      const url = `/api/dossier/export?format=json&ra=${effRa}&dec=${effDec}&target_name=${encodeURIComponent(effName || '')}&fov_arcmin=${effFov}`;
+      const url = `${getApiBase()}/dossier/export?format=json&ra=${effRa}&dec=${effDec}&target_name=${encodeURIComponent(effName || '')}&fov_arcmin=${effFov}`;
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,7 +88,7 @@ export default function ScientificEvidenceDossier() {
   }, []);
 
   const handleDownloadPdf = () => {
-    const url = `/api/dossier/export?format=pdf&ra=${currentTarget.ra}&dec=${currentTarget.dec}&target_name=${encodeURIComponent(currentTarget.name)}&fov_arcmin=${currentTarget.fov}`;
+    const url = `${getApiBase()}/dossier/export?format=pdf&ra=${currentTarget.ra}&dec=${currentTarget.dec}&target_name=${encodeURIComponent(currentTarget.name)}&fov_arcmin=${currentTarget.fov}`;
     window.open(url, '_blank');
   };
 
