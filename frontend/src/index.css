@@ -521,20 +521,54 @@ html.light .cosmoscope-landing #faq [class*="bg-[#071225]"] {
   box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03) !important;
 }
 html.light .cosmoscope-landing #faq button span {
-  color: #091124 !important;
-  font-weight: 700 !important;
+  color: #091124;
 }
 html.light .cosmoscope-landing #faq button:hover span {
-  color: #0284c7 !important;
+  color: #0284c7;
+}
+html.light .cosmoscope-landing #faq button[aria-pressed="true"] span {
+  color: #0f172a !important;
 }
 html.light .cosmoscope-landing #faq button div[class*="bg-[#0B1730]"] {
   background-color: #f1f5f9 !important;
   border-color: #cbd5e1 !important;
   color: #0284c7 !important;
 }
+html.light .cosmoscope-landing #faq input {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #091124 !important;
+}
+html.light .cosmoscope-landing #faq input::placeholder {
+  color: #64748b !important;
+}
 html.light .cosmoscope-landing #faq .border-t {
   border-color: rgba(208, 219, 231, 0.8) !important;
+}
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] p,
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] li {
   color: #334155 !important;
+}
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] strong {
+  color: #091124 !important;
+}
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] code {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0369a1 !important;
+}
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] [class*="bg-[#0B1730]"] {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] [class*="bg-[#071225]"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #1e293b !important;
+}
+html.light .cosmoscope-landing #faq [id^="faq-answer-"] .text-slate-300 {
+  color: #475569 !important;
 }
 
 /* 9.14 Footer in Light Mode */

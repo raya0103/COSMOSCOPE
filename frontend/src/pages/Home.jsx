@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import SearchHeader from '../components/SearchHeader';
 import FullPageGalaxyBackground from '../components/FullPageGalaxyBackground';
+import FaqSection from '../components/FaqSection';
 import { api } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
 
@@ -38,7 +39,6 @@ export default function Home() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState(null);
   const [activeTargetTab, setActiveTargetTab] = useState(0);
   const [targets, setTargets] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -54,10 +54,6 @@ export default function Home() {
 
   const handleSearch = (searchParams) => {
     navigate(`/explorer?ra=${searchParams.ra}&dec=${searchParams.dec}&fov=${searchParams.fov_arcmin}&name=${encodeURIComponent(searchParams.target_name || '')}`);
-  };
-
-  const toggleFaq = (idx) => {
-    setOpenFaq(prev => (prev === idx ? null : idx));
   };
 
   // 5 Research Targets Metadata
@@ -131,38 +127,6 @@ export default function Home() {
       significance: "Evolved giant undergoing radial pulsations with a 245.6-day period and severe flux variations (>5 mag amplitude), expelling circumstellar dust shells into the interstellar medium.",
       image: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?q=80&w=1200&auto=format&fit=crop",
       badge: "Long-Period Variable Giant"
-    }
-  ];
-
-  // 12 Rigorous FAQs
-  const faqs = [
-    {
-      q: "What is COSMOSCOPE?",
-      a: "COSMOSCOPE is an interactive astronomical exploration platform developed for the NASA Space Apps Challenge. It allows astronomers, researchers, and citizen scientists to explore genuine infrared observations from NASA's SPHEREx mission, investigate multi-epoch variability, inspect 102 spectral channels, and cross-reference targets across Gaia, 2MASS, and AllWISE catalogues."
-    },
-    {
-      q: "What is the SPHEREx mission?",
-      a: "SPHEREx (Spectro-Photometer for the History of the Universe, Epoch of Reionization and Ices Explorer) is a NASA Medium-Class Explorer (MIDEX) mission designed to perform the first all-sky near-infrared spectral survey. Operating from a 650 km Sun-synchronous low-Earth orbit, SPHEREx maps the entire celestial sphere every 6 months across 102 narrow spectral bands spanning 0.75 to 5.0 µm."
-    },
-    {
-      q: "What is the Cosmic Time Machine?",
-      a: "The Cosmic Time Machine allows you to inspect multi-epoch observations of the same celestial patch taken at different survey epochs. You can toggle variable-frequency blinking (0.5 to 3.0 Hz) to visually isolate moving or variable objects, compute flux-matched differential images (I₂ - αI₁), and examine synchronized astrometric displacement curves against Gaia DR3 proper motion baselines."
-    },
-    {
-      q: "Are the astronomical observations in COSMOSCOPE real?",
-      a: "Yes. All FITS products utilized across the platform are authentic Level 2 Multi-Extension FITS (MEF) cutouts retrieved from the official NASA/IPAC Infrared Science Archive (IRSA) SPHEREx Quick Release collections. Every image includes authentic FITS headers, astrometric WCS coordinates, observation timestamps (UTC/MJD), and detector calibrations."
-    },
-    {
-      q: "What is the difference between measured and modelled data in COSMOSCOPE?",
-      a: "COSMOSCOPE maintains strict scientific transparency. Measured observations represent raw calibrated pixel matrices and aperture flux integrations obtained directly from telescope FITS cutouts. Modelled data includes parameterized theoretical light curves (such as our 24-epoch Mira pulsation baseline) and orbital trajectories, which are always visibly badged as models to prevent confusion with single-epoch exposures."
-    },
-    {
-      q: "Which astronomical targets are included in COSMOSCOPE?",
-      a: "COSMOSCOPE features five verified case-study targets representing key infrared astrophysical phenomena: Barnard's Star (high-velocity kinematic red dwarf), Epsilon Indi B (cold binary brown dwarf), WISE 0855-0714 (ultra-cool sub-stellar water-ice cloud candidate), RW Aurigae (eruptive Young Stellar Object), and R Draconis (pulsating Mira variable). You can also query any celestial coordinate via the live Sky Explorer."
-    },
-    {
-      q: "Where does COSMOSCOPE retrieve its data?",
-      a: "Observations are pulled directly from the NASA/IPAC Infrared Science Archive (IRSA) TAP service and the IBE Cutout API. Astrometric motion vectors and multi-mission baselines are retrieved via live TAP and ConeSearch queries to ESA's Gaia DR3, NASA's AllWISE, 2MASS, and CDS SIMBAD."
     }
   ];
 
@@ -1105,53 +1069,7 @@ export default function Home() {
         {/* =========================================================================
             10. FAQ: Interactive Scientific FAQ Accordion
             ========================================================================= */}
-        <section id="faq" className="py-24 bg-[#071225]/40 backdrop-blur-sm border-t border-cyan-500/20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center space-y-4 mb-14">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#0B1730]/85 border border-cyan-500/40 text-[#36DDF5] text-xs font-semibold tracking-widest uppercase">
-                Questions & Answers
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#F5F8FF] tracking-tight">
-                Frequently Asked Questions
-              </h2>
-              <p className="text-sm sm:text-base text-[#C4D0E0] font-light">
-                Clear, scientifically rigorous explanations of COSMOSCOPE's features, data authenticity, and limitations.
-              </p>
-            </div>
-
-            {/* Accordion List: Translucent Dark Navy Glass */}
-            <div className="space-y-4">
-              {faqs.map((faq, idx) => {
-                const isOpen = openFaq === idx;
-                return (
-                  <div 
-                    key={idx}
-                    className="rounded-2xl bg-[#071225]/85 backdrop-blur-md border border-cyan-500/25 overflow-hidden shadow-sm transition-colors duration-200"
-                  >
-                    <button
-                      onClick={() => toggleFaq(idx)}
-                      className="w-full p-6 text-left flex items-center justify-between gap-4 hover:text-[#36DDF5] transition-colors"
-                    >
-                      <span className="text-base font-bold text-[#F5F8FF]">{faq.q}</span>
-                      <div className="w-8 h-8 rounded-full bg-[#0B1730] border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-                        {isOpen ? (
-                          <ChevronUp className="w-4 h-4 text-[#36DDF5]" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-[#91A3BA]" />
-                        )}
-                      </div>
-                    </button>
-                    {isOpen && (
-                      <div className="px-6 pb-6 text-sm text-[#C4D0E0] leading-relaxed font-light border-t border-cyan-500/15 pt-4">
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
+        <FaqSection />
 
         {/* =========================================================================
             11. FOOTER: Professional Scientific Footer (Restored Dark Theme)
