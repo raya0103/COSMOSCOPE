@@ -306,3 +306,266 @@ html.light tr {
 html.light tr:hover {
   background-color: rgba(2, 132, 199, 0.04) !important;
 }
+
+/* ==========================================================================
+   9. COSMOSCOPE LANDING PAGE — LIGHT MODE HIGH CONTRAST SPECIFICATION
+   Ensures WCAG AA+ readability across all headings, body text, cards, buttons,
+   badges, FAQ, and footer without modifying dark mode styling.
+   ========================================================================== */
+
+/* Root Container Text Default */
+html.light .cosmoscope-landing {
+  color: #1e293b !important;
+}
+
+/* 9.1 Primary Headings & Titles (Deep Celestial Navy) */
+html.light .cosmoscope-landing .text-\[\#F5F8FF\],
+html.light .cosmoscope-landing [class*="text-[#F5F8FF]"] {
+  color: #091124 !important;
+}
+html.light .cosmoscope-landing h1,
+html.light .cosmoscope-landing h2,
+html.light .cosmoscope-landing h3,
+html.light .cosmoscope-landing h4 {
+  color: #091124 !important;
+}
+
+/* 9.2 Body Paragraphs & Descriptions (Deep Slate / Charcoal) */
+html.light .cosmoscope-landing .text-\[\#C4D0E0\],
+html.light .cosmoscope-landing [class*="text-[#C4D0E0]"] {
+  color: #334155 !important;
+}
+html.light .cosmoscope-landing p {
+  color: #334155 !important;
+}
+
+/* 9.3 Captions, Metadata & Subtitles (Readable Slate Grey) */
+html.light .cosmoscope-landing .text-\[\#91A3BA\],
+html.light .cosmoscope-landing [class*="text-[#91A3BA]"] {
+  color: #475569 !important;
+}
+
+/* 9.4 Astronomical Accents & Links (Oceanic Sky Blue) */
+html.light .cosmoscope-landing .text-\[\#36DDF5\],
+html.light .cosmoscope-landing [class*="text-[#36DDF5]"] {
+  color: #0284c7 !important;
+  font-weight: 600;
+}
+html.light .cosmoscope-landing a:hover {
+  color: #0284c7 !important;
+}
+
+/* 9.5 Hero Title Gradient & Brand Heading */
+html.light .cosmoscope-landing .hero-gradient-title {
+  background-image: linear-gradient(to right, #0284c7, #0369a1, #6d28d9) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+html.light .cosmoscope-brand-text {
+  background-image: linear-gradient(to right, #091124, #0369a1, #0284c7) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* 9.6 Hero Action Buttons & Controls */
+html.light .cosmoscope-landing a[href="#about"] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(2, 132, 199, 0.4) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05) !important;
+}
+html.light .cosmoscope-landing a[href="#about"]:hover {
+  background-color: #f0f9ff !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+
+/* 9.7 Hero Metrics Strip Cards */
+html.light .cosmoscope-landing .pt-10.grid > div {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
+}
+html.light .cosmoscope-landing .pt-10.grid > div div:first-child {
+  color: #0284c7 !important;
+}
+html.light .cosmoscope-landing .pt-10.grid > div:nth-child(2) div:first-child {
+  color: #0369a1 !important;
+}
+html.light .cosmoscope-landing .pt-10.grid > div:nth-child(3) div:first-child {
+  color: #6d28d9 !important;
+}
+html.light .cosmoscope-landing .pt-10.grid > div:nth-child(4) div:first-child {
+  color: #047857 !important;
+}
+html.light .cosmoscope-landing .pt-10.grid > div div:last-child {
+  color: #475569 !important;
+  font-weight: 700 !important;
+}
+
+/* 9.8 Navigation Bar in Light Mode */
+html.light .cosmoscope-landing nav {
+  background-color: rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06) !important;
+}
+html.light .cosmoscope-landing nav a {
+  color: #1e293b !important;
+}
+html.light .cosmoscope-landing nav a:hover {
+  color: #0284c7 !important;
+}
+html.light .cosmoscope-landing nav button {
+  background-color: rgba(255, 255, 255, 0.90) !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+html.light .cosmoscope-landing nav .lg\:hidden {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+}
+
+/* 9.9 Pill Badges & Category Labels */
+html.light .cosmoscope-landing [class*="bg-[#0B1730]"],
+html.light .cosmoscope-landing [class*="bg-[#0b1730]"] {
+  background-color: #e0f2fe !important;
+  border-color: #7dd3fc !important;
+  color: #0369a1 !important;
+}
+html.light .cosmoscope-landing .rounded-full[class*="border-violet-500"] {
+  background-color: #f3e8ff !important;
+  border-color: #d8b4fe !important;
+  color: #6d28d9 !important;
+}
+html.light .cosmoscope-landing .rounded-full[class*="border-emerald-500"] {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  color: #047857 !important;
+}
+
+/* 9.10 Cards & Information Panels (Frosted Glass with High Contrast Borders) */
+html.light .cosmoscope-landing [class*="bg-[#071225]"] {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+}
+html.light .cosmoscope-landing .group:hover {
+  border-color: rgba(2, 132, 199, 0.5) !important;
+  box-shadow: 0 12px 30px -4px rgba(2, 132, 199, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.04) !important;
+}
+html.light .cosmoscope-landing [class*="from-[#071225]"] {
+  --tw-gradient-from: rgba(255, 255, 255, 0.95) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), rgba(255, 255, 255, 0.4) 40%, var(--tw-gradient-to) !important;
+}
+html.light .cosmoscope-landing section[class*="bg-[#071225]"] {
+  background-color: rgba(237, 242, 249, 0.55) !important;
+  border-color: rgba(208, 219, 231, 0.8) !important;
+}
+
+/* Card bottom divider lines */
+html.light .cosmoscope-landing .border-cyan-500\/15,
+html.light .cosmoscope-landing .border-violet-500\/15,
+html.light .cosmoscope-landing .border-sky-500\/15,
+html.light .cosmoscope-landing .border-cyan-500\/20,
+html.light .cosmoscope-landing .border-violet-500\/20,
+html.light .cosmoscope-landing .border-emerald-500\/20 {
+  border-color: rgba(208, 219, 231, 0.8) !important;
+}
+
+/* 9.11 Target Selector Tabs & Active Dossier Grid */
+html.light .cosmoscope-landing button[class*="bg-[#071225]"] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+html.light .cosmoscope-landing button[class*="bg-[#071225]"]:hover {
+  background-color: #f0f9ff !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+}
+html.light .cosmoscope-landing .grid [class*="bg-[#0B1730]"] {
+  background-color: rgba(244, 247, 251, 0.95) !important;
+  border-color: rgba(208, 219, 231, 0.85) !important;
+}
+html.light .cosmoscope-landing .grid [class*="bg-[#0B1730]"] div:first-child {
+  color: #475569 !important;
+  font-weight: 700 !important;
+}
+html.light .cosmoscope-landing .grid [class*="bg-[#0B1730]"] div:last-child {
+  color: #091124 !important;
+  font-weight: 700 !important;
+}
+
+/* 9.12 Mission Impact Section Overlays in Light Mode */
+html.light .cosmoscope-landing section.relative.py-28 [class*="bg-[#030712]"] {
+  background-color: rgba(244, 247, 251, 0.92) !important;
+}
+html.light .cosmoscope-landing section.relative.py-28 [class*="from-[#030712]"] {
+  --tw-gradient-from: #f4f7fb var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(244, 247, 251, 0) var(--tw-gradient-from-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), transparent, #f4f7fb !important;
+}
+html.light .cosmoscope-landing section.relative.py-28 p.italic {
+  color: #0284c7 !important;
+  font-weight: 600 !important;
+}
+
+/* 9.13 FAQ Accordion in Light Mode */
+html.light .cosmoscope-landing #faq [class*="bg-[#071225]"] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(208, 219, 231, 0.9) !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03) !important;
+}
+html.light .cosmoscope-landing #faq button span {
+  color: #091124 !important;
+  font-weight: 700 !important;
+}
+html.light .cosmoscope-landing #faq button:hover span {
+  color: #0284c7 !important;
+}
+html.light .cosmoscope-landing #faq button div[class*="bg-[#0B1730]"] {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0284c7 !important;
+}
+html.light .cosmoscope-landing #faq .border-t {
+  border-color: rgba(208, 219, 231, 0.8) !important;
+  color: #334155 !important;
+}
+
+/* 9.14 Footer in Light Mode */
+html.light .cosmoscope-landing footer {
+  background-color: rgba(244, 247, 251, 0.98) !important;
+  border-color: #d0dbe7 !important;
+  color: #475569 !important;
+}
+html.light .cosmoscope-landing footer span.text-\[\#F5F8FF\],
+html.light .cosmoscope-landing footer .text-\[\#F5F8FF\] {
+  color: #091124 !important;
+  font-weight: 800 !important;
+}
+html.light .cosmoscope-landing footer p,
+html.light .cosmoscope-landing footer div {
+  color: #475569 !important;
+}
+html.light .cosmoscope-landing footer a {
+  color: #334155 !important;
+}
+html.light .cosmoscope-landing footer a:hover {
+  color: #0284c7 !important;
+}
+html.light .cosmoscope-landing footer .border-cyan-500\/20 {
+  border-color: #d0dbe7 !important;
+}
+html.light .cosmoscope-landing footer .border-t > div:first-child {
+  color: #475569 !important;
+}
+html.light .cosmoscope-landing footer .border-t > div:last-child {
+  color: #0284c7 !important;
+  font-weight: 700 !important;
+}
+

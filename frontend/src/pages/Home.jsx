@@ -167,7 +167,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen text-[#C4D0E0] selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden">
+    <div className="cosmoscope-landing relative min-h-screen text-[#C4D0E0] selection:bg-cyan-500/30 selection:text-cyan-200 overflow-x-hidden">
       
       {/* =========================================================================
           FULL-PAGE ANIMATED GALAXY BACKGROUND (Preserved exactly as requested)
@@ -191,7 +191,7 @@ export default function Home() {
                   <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping opacity-75" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-black tracking-widest text-lg bg-gradient-to-r from-[#F5F8FF] via-cyan-200 to-sky-400 bg-clip-text text-transparent">
+                  <span className="font-black tracking-widest text-lg bg-gradient-to-r from-[#F5F8FF] via-cyan-200 to-sky-400 bg-clip-text text-transparent cosmoscope-brand-text">
                     COSMOSCOPE
                   </span>
                   <span className="text-[10px] font-mono text-[#91A3BA] tracking-wider">
@@ -311,10 +311,11 @@ export default function Home() {
 
               <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-[#F5F8FF] leading-[1.05]">
                 EXPLORE THE <br />
-                <span className="bg-gradient-to-r from-[#36DDF5] via-sky-300 to-violet-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-[#36DDF5] via-sky-300 to-violet-400 bg-clip-text text-transparent hero-gradient-title">
                   CHANGING UNIVERSE.
                 </span>
               </h1>
+
 
               {/* Supporting Text */}
               <p className="mt-6 text-lg sm:text-2xl text-[#C4D0E0] font-light max-w-3xl mx-auto leading-relaxed">
